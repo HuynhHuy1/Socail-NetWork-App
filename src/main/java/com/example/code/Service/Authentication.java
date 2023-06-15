@@ -32,27 +32,16 @@ public class Authentication {
         else{
             return false;
         }
+    }  
+    public boolean forgetPassword(String email){
+        User user = getUserByMail(email);
+        if(user == null){
+            return false;
+        }
+        else{
+            return true;
+        }
     }
-    // public boolean updatePassword(String email){
-    //     List<User> listUser = getUserByMail(email);
-    //     if(listUser.size() == 0){
-    //         return false;
-    //     }
-    //     else{
-    //         updatePassword(email)
-    //     }
-    //     return false;
-    // }
-    // private User userMapper(Map<String, String> infoUser){
-    //     User user = new User();
-    //     user.setUserName(infoUser.get("UserName"));
-    //     user.setAvatar(infoUser.get("Avatar"));
-    //     user.setUserAddress(infoUser.get("UserAddress"));
-    //     user.setUserPhone(infoUser.get("UserPhone"));
-    //     user.setPASSWORD(infoUser.get("Password"));
-    //     user.setEmail(infoUser.get("Email"));
-    //     return user;
-    // }
     private User getUserByMail(String email){
         User User = userDao.getUserByEmail(email);
         return User;

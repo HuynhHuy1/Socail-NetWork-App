@@ -17,18 +17,26 @@ public interface UserDao {
     @Select("SELECT * FROM Users")
     List<User> getUserAll();
 
-    @Select("Select * from Users where Email = #{email}  ")
+    @Select(" SELECT * FROM Users " +
+             " WHERE Email = #{email} ")
     User getUserByEmail(@Param("email") String email);
 
-    @Select("Select * from Users where UserName = #{userName}")
+    @Select(" SELECT * FROM Users " +  
+            " WHERE UserName = #{userName} ")
     List<User> getUserByName(@Param("UserName") String userName);
     
-    @Insert("INSERT INTO Users (UserName, Avatar, UserAddress, UserPhone, Email, PASSWORD) " +
-    "VALUES (#{UserName}, #{Avatar}, #{UserAddress}, #{UserPhone}, #{Email}, #{PASSWORD})")
+    @Insert(" INSERT INTO Users (UserName, Avatar, UserAddress, UserPhone, Email, PASSWORD) " +
+            " VALUES (#{UserName}, #{Avatar}, #{UserAddress}, #{UserPhone}, #{Email}, #{PASSWORD}) ")
     void insertUser(User user);
-    @Update("Update Users set UserName = #{name},Avatar = #{avatar},UserAddress = #{address},UserPhone = #{phone},Email = #{email},PASSWORD =#{password} where id = #{id}")
+    @Update(" UPDATE Users " +
+            " SET UserName = #{name},Avatar = #{avatar},UserAddress = #{address},UserPhone = #{phone},Email = #{email},PASSWORD =#{password}" +
+            " WHERE id = #{id}")
     void updateUser(User user,@Param("id") int id);
+    @Update(" UPDATE Users " + 
+            " SET PASSWORD = #{password} ")
+    void updatePassWord(@Param("password") String password,@Param("id")  int id);
 
-    @Delete("Delete * from user where id = #{id}")
+    @Delete(" DELETE * FROM Users " +
+            " where id = #{id} ")
     void deteteUser(@Param("id") int id);
 }
