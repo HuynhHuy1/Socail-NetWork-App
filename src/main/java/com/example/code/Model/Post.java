@@ -9,7 +9,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
+public class Post {
+    private int StatusID;
+    private String Content,Video,Image;
     private int UserID;
-    private String UserName, Avatar, UserAddress, UserPhone, Email, PASSWORD;
 }

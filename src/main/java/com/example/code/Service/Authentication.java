@@ -1,45 +1,55 @@
 package com.example.code.Service;
 import java.util.List;
 import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.example.code.DAO.UserDao;
 import com.example.code.EmailSerivce.EmailService;
 import com.example.code.Model.User;
+import com.example.code.Util.DBUtil;
+import com.example.code.middleware.Authorization;
 @Service
 public class Authentication {
     private final UserDao userDao;
     @Autowired
     private EmailService emailService;
+    @Autowired
+    DBUtil dbUtil;
+    @Autowired
+    Authorization authorization;
 
     public Authentication(UserDao userDao) {
         this.userDao = userDao;
     }
-    public Boolean login(Map<String,String> map){
+    public String login(Map<String,String> map){
         String email = map.get("Email");
         String password = map.get("Password");
-        User user = getUserByMail(email);
+        String token = authorization.getToken(email);
+        User user = dbUtil.getUserByEmail(email);
         if(user == null){
-            return false;
+            return " Email khong ton tai";
         }
         else{
             String value = user.getPASSWORD();
-            return value.equals(password) ? true : false;
+            if(value.equals(password) ) return token;
+            return "Sai password";
         }
         }
-    public boolean singUp(Map<String, String> infoUser){
-        User User = getUserByMail(infoUser.get("Email"));
-        if(User == null){
-            userDao.insertUser(User);
-            return true;
+
+
+    public String singUp(Map<String, String> infoUser){
+        User user = dbUtil.getUserByEmail(infoUser.get("Email"));
+        if(user == null){
+            user = setUser(infoUser);
+            userDao.insertUser(user);
+            return authorization.getToken(infoUser.get("Email"));
         }
         else{
-            return false;
+            return "Email đã tồn tại";
         }
     }  
     public boolean forgetPassword(String email){
-        User user = getUserByMail(email);
+        User user = dbUtil.getUserByEmail(email);
         if(user == null){
             return false;
         }
@@ -51,12 +61,8 @@ public class Authentication {
     private void sendEmail(String email){
         String to = email;
         String subject = "Xác nhận thay đổi mật khẩu";
-        String body = "Vui lòng nhấn vào link nào để thay đổi mật khẩu: http://localhost:8090/user/ResetPasswordForm";
+        String body = "Vui lòng nhấn vào link nào để thay đổi mật khẩu: http://localhost:8090/user/ResetPasswordForm" ;
         emailService.sendEmail(to, subject, body);
-    }
-    private User getUserByMail(String email){
-        User User = userDao.getUserByEmail(email);
-        return User;
     }
     public List<User> getAll(){
         List<User> User = userDao.getUserAll();
@@ -72,12 +78,33 @@ public class Authentication {
             return true;
         }
     }
-    public List<User> getFriend(String email){
-        int id = getIntByEmail(email);
+    public List<User> getFriend(String token){
+        User user = authorization.parseToken(token) ;
+        int id = user.getUserID();
         return userDao.getFriend(id);
-        
     }
-    private int getIntByEmail(String email){
-        return userDao.getIDByEmail(email);
+    private User setUser(Map<String, String> infoUser){
+        User user = new User();
+        infoUser.forEach((key, value) -> {
+            if (key.equals("Email")) {
+                user.setEmail(value);
+            }
+            if (key.equals("Password")) {
+                user.setPASSWORD(value);
+            }
+            if (key.equals("Avatar")) {
+                user.setAvatar(value);
+            }
+            if (key.equals("UserPhone")) {
+                user.setUserPhone(value);
+            }
+            if (key.equals("UserAddress")) {
+                user.setUserAddress(value);
+            }
+            if (key.equals("UserName")) {
+                user.setUserName(value);
+            }
+        });
+        return user;
     }
 }

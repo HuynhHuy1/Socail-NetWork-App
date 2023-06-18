@@ -19,6 +19,11 @@ public interface UserDao {
         List<User> getUserAll();
 
         @Select(" SELECT * FROM Users " +
+        " WHERE UserID = #{id} ")
+        User getUserByID(@Param("id") int id);
+
+
+        @Select(" SELECT * FROM Users " +
                 " WHERE Email = #{email} ")
         User getUserByEmail(@Param("email") String email);
 

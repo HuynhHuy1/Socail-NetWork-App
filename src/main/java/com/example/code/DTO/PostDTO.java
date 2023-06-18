@@ -11,4 +11,5 @@ import lombok.Setter;
 @AllArgsConstructor
 public class PostDTO {
     private String UserName, Content , Image , Video;
+    private int LikeCount, CommentCount;
 }
