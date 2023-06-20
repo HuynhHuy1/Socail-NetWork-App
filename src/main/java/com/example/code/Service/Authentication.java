@@ -24,15 +24,15 @@ public class Authentication {
     public String login(Map<String,String> map){
         String email = map.get("Email");
         String password = map.get("Password");
-        String token = authorization.getToken(email);
         User user = dbUtil.getUserByEmail(email);
         if(user == null){
-            return " Email khong ton tai";
+            return "EmailError";
         }
         else{
             String value = user.getPASSWORD();
+            String token = authorization.generateToken(user);
             if(value.equals(password) ) return token;
-            return "Sai password";
+            return "PasswordError";
         }
         }
 
@@ -42,10 +42,10 @@ public class Authentication {
         if(user == null){
             user = setUser(infoUser);
             userDao.insertUser(user);
-            return authorization.getToken(infoUser.get("Email"));
+            return authorization.generateToken(user);
         }
         else{
-            return "Email đã tồn tại";
+            return "EmailError";
         }
     }  
     public boolean forgetPassword(String email){
@@ -79,8 +79,7 @@ public class Authentication {
         }
     }
     public List<User> getFriend(String token){
-        User user = authorization.parseToken(token) ;
-        int id = user.getUserID();
+        int id = authorization.parseToken(token) ;
         return userDao.getFriend(id);
     }
     private User setUser(Map<String, String> infoUser){

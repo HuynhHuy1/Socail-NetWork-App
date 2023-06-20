@@ -1,5 +1,7 @@
 package com.example.code.DTO;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,6 +12,8 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PostDTO {
-    private String UserName, Content , Image , Video;
+    private int StatusID;
+    private String UserName, Content;
+    private List<String> image; 
     private int LikeCount, CommentCount;
 }

@@ -11,6 +11,6 @@ import lombok.Setter;
 @AllArgsConstructor
 public class Post {
     private int StatusID;
-    private String Content,Video,Image;
+    private String Content;
     private int UserID;
 }

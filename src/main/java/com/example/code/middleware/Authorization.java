@@ -20,19 +20,11 @@ public class Authorization {
     @Autowired
     DBUtil dbUtil;
 
-        public String getToken(String email) {
+        public String generateToken(User user) {
             Date date = new Date();
-            User user = dbUtil.getUserByEmail(email);
-            
             Date expiration = new Date(date.getTime() + EXPIRATION_TIME);
             String token = Jwts.builder()
                     .setSubject(user.getUserID() +"")
-                    .claim("Avatar",user.getAvatar())
-                    .claim("Email", user.getEmail())
-                    .claim("PASSWORD", user.getPASSWORD())
-                    .claim("UserAddress", user.getUserAddress())
-                    .claim("UserPhone", user.getUserPhone())
-                    .claim("UserName", user.getUserName())
                     .setIssuedAt(date)
                     .setExpiration(expiration)
                     .signWith(SignatureAlgorithm.HS256,secretKey)
@@ -40,43 +32,28 @@ public class Authorization {
             return token;
         }
 
-        public User parseToken(String token) {
+        public int parseToken(String token) {
             try {
                 Claims claims = Jwts.parser()
                 .setSigningKey(secretKey)
-                .parseClaimsJws(token) // Sửa đổi ở đây, sử dụng parseClaimsJws() thay vì parseClaimsJwt()
+                .parseClaimsJws(token) 
                 .getBody();
                 int id = Integer.parseInt(claims.getSubject()) ;
-                String avatar = (String) claims.get("Avatar");
-                String email = (String) claims.get("Email");
-                String password = (String) claims.get("PASSWORD");
-                String userAddress = (String) claims.get("UserAddress");
-                String userPhone = (String) claims.get("UserPhone");
-                String userName = (String) claims.get("UserName");
-                User user = new User();
-                user.setUserID(id);
-                user.setAvatar(avatar);
-                user.setEmail(email);
-                user.setPASSWORD(password);
-                user.setUserAddress(userAddress);
-                user.setUserPhone(userPhone);
-                user.setUserName(userName);
-                return user;
+                return id;
             } catch (JwtException e) {
-                return null;
+                return 0;
             }
 
         }
         public boolean isValidUser(String token){
             try {
-                Claims claims = Jwts.parser()
+                Jwts.parser()
                 .setSigningKey(secretKey)
-                .parseClaimsJws(token) // Sửa đổi ở đây, sử dụng parseClaimsJws() thay vì parseClaimsJwt()
+                .parseClaimsJws(token)
                 .getBody();
                 return true;
             } catch (JwtException e) {
                 return false;
             }
         }
-        
 }
