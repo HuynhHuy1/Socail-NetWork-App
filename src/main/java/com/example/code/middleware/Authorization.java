@@ -16,17 +16,11 @@ import io.jsonwebtoken.SignatureAlgorithm;
 @Component
 public class Authorization {
     private static String secretKey = "MyKey";
-    private static long EXPIRATION_TIME = 864000000;
     @Autowired
     DBUtil dbUtil;
-
         public String generateToken(User user) {
-            Date date = new Date();
-            Date expiration = new Date(date.getTime() + EXPIRATION_TIME);
             String token = Jwts.builder()
                     .setSubject(user.getUserID() +"")
-                    .setIssuedAt(date)
-                    .setExpiration(expiration)
                     .signWith(SignatureAlgorithm.HS256,secretKey)
                     .compact();
             return token;
@@ -56,4 +50,13 @@ public class Authorization {
                 return false;
             }
         }
+
+        public String generateTokenForgotPassword(int keyNumber){
+            String token = Jwts.builder()
+            .setSubject(keyNumber+"")
+            .signWith(SignatureAlgorithm.HS256,secretKey)
+            .compact();
+            return token;
+        }
+
 }

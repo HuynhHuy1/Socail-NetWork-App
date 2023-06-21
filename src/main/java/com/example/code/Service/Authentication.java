@@ -1,10 +1,15 @@
 package com.example.code.Service;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import com.example.code.DAO.UserDao;
 import com.example.code.EmailSerivce.EmailService;
+import com.example.code.Model.ForgotPassword;
+import com.example.code.Model.Response;
 import com.example.code.Model.User;
 import com.example.code.Util.DBUtil;
 import com.example.code.middleware.Authorization;
@@ -35,8 +40,6 @@ public class Authentication {
             return "PasswordError";
         }
         }
-
-
     public String singUp(Map<String, String> infoUser){
         User user = dbUtil.getUserByEmail(infoUser.get("Email"));
         if(user == null){
@@ -68,21 +71,22 @@ public class Authentication {
         List<User> User = userDao.getUserAll();
         return User;
     }
-    public boolean resetPassword(String email, String passWord){
+    public boolean sendKeyNumbe(String email){
         User user = userDao.getUserByEmail(email);
-        if(user == null){
-            return false;
-        }
-        else{
-            userDao.updatePassWord(passWord,email);
+        int min = 100_000; // Giá trị tối thiểu (100000)
+        int max = 999_999; // Giá trị tối đa (999999)
+
+        Random random = new Random();
+        int keyNumber = random.nextInt(max - min + 1) + min;
+        String subject = " Mã thay đổi mật khẩu";
+        if(user != null){
+            userDao.generateKey(email, keyNumber);
+            emailService.sendEmail(email,subject,keyNumber + "");
             return true;
         }
+        return false;
     }
-    public List<User> getFriend(String token){
-        int id = authorization.parseToken(token) ;
-        return userDao.getFriend(id);
-    }
-    private User setUser(Map<String, String> infoUser){
+    public User setUser(Map<String, String> infoUser){
         User user = new User();
         infoUser.forEach((key, value) -> {
             if (key.equals("Email")) {
@@ -105,5 +109,20 @@ public class Authentication {
             }
         });
         return user;
+    }
+    public String getTokenForgotPassword(int keyNumber) {
+        ForgotPassword forgotPassword = userDao.getForgotPassword(keyNumber);
+        if(forgotPassword != null){
+            String token = authorization.generateTokenForgotPassword(keyNumber);
+            return token;
+        }
+        else{
+            return null;
+        }
+    }
+    public void resetPassWord(int numberKey ,String passWord) {
+        String email = userDao.getEmailByKey(numberKey);
+        userDao.resetPassWord(email, passWord);
+        userDao.deletePorgotPassword(email, numberKey);
     }
 }

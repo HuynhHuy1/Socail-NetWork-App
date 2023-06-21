@@ -43,7 +43,29 @@ public class RequestFilter implements HandlerInterceptor {
                 response.getWriter().write(new Response("False","Loi xac thuc nguoi dung","").toJsonString());
                 return false;
             }
-        }
+            }
+            else if(requString.contains("ResetPassword")){
+                try {
+                    String token = request.getHeader("KeyNumber");
+                    if(authorization.isValidUser(token)){
+                        int numberKey = authorization.parseToken(token);
+                        request.setAttribute("numberKey", numberKey);
+                        return true;
+                    }
+                    else
+                    {
+                        response.setStatus(403);
+                        response.setContentType("application/json");
+                        response.getWriter().write(new Response("False","Đổi mật khẩu thất bại","").  toJsonString());
+                        return false;
+                    } 
+                } catch (Exception e) {
+                    response.setStatus(403);
+                    response.setContentType("application/json");
+                    response.getWriter().write(new Response("False","Đổi mật khẩu thất bại","").toJsonString());
+                    return false;
+                }
+            }
         return true;
     }
 }
