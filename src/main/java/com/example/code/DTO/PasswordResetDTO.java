@@ -1,6 +1,6 @@
 package com.example.code.dto;
 
-public class ForgotPasswordDTO {
+public class PasswordResetDTO {
     String Email;
     int KeyNumber;
 }

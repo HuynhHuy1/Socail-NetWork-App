@@ -13,21 +13,23 @@ import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.code.dao.FriendshipDao;
 import com.example.code.dto.FriendShipDTO;
 import com.example.code.dto.ResponseDTO;
 import com.example.code.dto.UserDTO;
-import com.example.code.service.PostService;
+import com.example.code.service.FriendshipService;
 
 @RestController
 @RequestMapping("api/friendships")
 public class FriendshipController {
 
-    @Autowired PostService postService; 
+    @Autowired
+    FriendshipService friendshipService;
 
     @GetMapping("requests")
     public ResponseEntity<ResponseDTO> getFriendshipRequests(@RequestAttribute("userID") int userID) {
         try {
-            List<FriendShipDTO> listRequest = postService.getFriendShipRequests(userID);
+            List<FriendShipDTO> listRequest = friendshipService.getFriendShipRequests(userID);
             return ResponseEntity.ok()
                     .body(new ResponseDTO("True", "Lấy danh sách lời mời kết bạn thành công", listRequest));
         } catch (Exception e) {
@@ -40,7 +42,7 @@ public class FriendshipController {
     public ResponseEntity<ResponseDTO> updateFriendShipRequest(@RequestAttribute("userID") int userID,
                                                            @PathVariable("user2-id") int user2ID) {
         try {
-            postService.updateStatusFriendRequest(userID, user2ID);
+            friendshipService.updateStatusFriendRequest(userID, user2ID);
             return ResponseEntity.ok().body(new ResponseDTO("True", "Phản hồi thành công", ""));
         } catch (Exception e) {
             return ResponseEntity.ok().body(new ResponseDTO("False", "Phản hồi thất bại", ""));
@@ -50,7 +52,7 @@ public class FriendshipController {
     @GetMapping()
     public ResponseEntity<ResponseDTO> getFriend(@RequestAttribute("userID") int userID) {
         try {
-            List<UserDTO> listFriend = postService.getFriend(userID);
+            List<UserDTO> listFriend = friendshipService.getFriend(userID);
             return ResponseEntity.ok().body(new ResponseDTO("True", "Lấy danh sách bạn thành công", listFriend));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new ResponseDTO("False", "Lấy danh sách bạn thất bại", ""));
@@ -61,7 +63,7 @@ public class FriendshipController {
     public ResponseEntity<ResponseDTO> addFriend(@RequestAttribute("userID") int userID,
                                                  @PathVariable("user2-id") int user2ID) {
         try {
-            postService.addFriend(userID, user2ID);
+            friendshipService.addFriend(userID, user2ID);
             return ResponseEntity.ok().body(new ResponseDTO("True", "thêm bạn bè thành công", ""));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new ResponseDTO("False", "thêm bạn bè thất bại", ""));
@@ -72,7 +74,7 @@ public class FriendshipController {
     public ResponseEntity<ResponseDTO> deleteFriend(@RequestAttribute("userID") int userID,
                                                     @PathVariable("user2ID") int user2ID) {
         try {
-            postService.deleteFriend(userID, user2ID);
+            friendshipService.deleteFriend(userID, user2ID);
             return ResponseEntity.ok().body(new ResponseDTO("True", "Xoá bạn thành công", ""));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new ResponseDTO("False", "Lấy danh sách bạn thất bại", ""));

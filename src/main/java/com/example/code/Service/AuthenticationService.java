@@ -1,125 +1,77 @@
 package com.example.code.service;
-import java.util.List;
-import java.util.Map;
+
 import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import com.example.code.util.DBUtil;
 import com.example.code.dao.UserDao;
-import com.example.code.dto.ForgotPasswordDTO;
+import com.example.code.dto.AuthenResponseDTO;
+import com.example.code.dto.PasswordResetDTO;
 import com.example.code.dto.UserDTO;
+
 @Service
 public class AuthenticationService {
-    private final UserDao userDao;
+    @Autowired
+    private UserDao userDao;
     @Autowired
     private EmailService emailService;
     @Autowired
-    DBUtil dbUtil;
-    @Autowired
-    AuthorizationService authorization;
+    private AuthorizationService authorizationService;
 
-    public AuthenticationService(UserDao userDao) {
-        this.userDao = userDao;
-    }
-    public String login(Map<String,String> map){
-        String email = map.get("Email");
-        String password = map.get("Password");
-        UserDTO user = dbUtil.getUserByEmail(email);
-        if(user == null){
-            return "EmailError";
-        }
-        else{
-            String value = user.getPassword();
-            String token = authorization.generateToken(user);
-            if(value.equals(password) ) return token;
-            return "PasswordError";
-        }
-        }
-    public String signUp(Map<String, String> infoUser){
-        UserDTO user = dbUtil.getUserByEmail(infoUser.get("Email"));
-        if(user == null){
-            user = setUser(infoUser);
-            userDao.insertUser(user);
-            return authorization.generateToken(user);
-        }
-        else{
-            return "EmailError";
-        }
-    }  
-    public boolean forgetPassword(String email){
-        UserDTO user = dbUtil.getUserByEmail(email);
-        if(user == null){
-            return false;
-        }
-        else{
-            sendEmail(email);
-            return true;
+    public AuthenResponseDTO login(UserDTO userLogin) {
+        UserDTO userData = userDao.getUserByEmail(userLogin.getEmail());
+        if (userData == null) {
+            return new AuthenResponseDTO(false, "");
+        } else {
+            String token = generateToken(userLogin);
+            String passwordData = userData.getPassword();
+            String passwordLogin = userLogin.getPassword();
+            return (passwordLogin.equals(passwordData)) ? new AuthenResponseDTO(true, token)
+                    : new AuthenResponseDTO(false, "");
         }
     }
-    private void sendEmail(String email){
-        String to = email;
-        String subject = "Xác nhận thay đổi mật khẩu";
-        String body = "Vui lòng nhấn vào link nào để thay đổi mật khẩu: http://localhost:8090/user/ResetPasswordForm" ;
-        emailService.sendEmail(to, subject, body);
+    public AuthenResponseDTO signUp(UserDTO userSignUp) {
+        UserDTO userData = userDao.getUserByEmail(userSignUp.getEmail());
+        if (userData == null) {
+            userDao.insertUser(userSignUp);
+            UserDTO userLateInsert = userDao.getUserByEmail(userSignUp.getEmail());
+            String token = generateToken(userLateInsert);
+            return new AuthenResponseDTO(true, token);
+        } else {
+            return new AuthenResponseDTO(false, "");
+        }
     }
-    public List<UserDTO> getAll(){
-        List<UserDTO> User = userDao.getUserAll();
-        return User;
-    }
-    public boolean sendKeyNumbe(String email){
-        UserDTO user = userDao.getUserByEmail(email);
-        int min = 100_000; // Giá trị tối thiểu (100000)
-        int max = 999_999; // Giá trị tối đa (999999)
 
+    public boolean isEmailExist(String Email){
+        UserDTO user = userDao.getUserByEmail(Email);
+        return user != null ? true : false ;
+    } 
+
+    public void sendConfirmationEmail(String email) {
+        int min = 100_000;
+        int max = 999_999;
         Random random = new Random();
         int keyNumber = random.nextInt(max - min + 1) + min;
-        String subject = " Mã thay đổi mật khẩu";
-        if(user != null){
-            userDao.generateKey(email, keyNumber);
-            emailService.sendEmail(email,subject,keyNumber + "");
-            return true;
-        }
-        return false;
+        String subject = " Mã thay đổi mật khẩu ";        
+        emailService.sendEmail(email, subject, keyNumber + "");
+        userDao.insertPasswordReset(email, keyNumber);
     }
-    public UserDTO setUser(Map<String, String> infoUser){
-        UserDTO user = new UserDTO();
-        infoUser.forEach((key, value) -> {
-            if (key.equals("Email")) {
-                user.setEmail(value);
-            }
-            if (key.equals("Password")) {
-                user.setPassword(value);
-            }
-            if (key.equals("Avatar")) {
-                user.setAvatar(value);
-            }
-            if (key.equals("UserPhone")) {
-                user.setPhone(value);
-            }
-            if (key.equals("UserAddress")) {
-                user.setAddress(value);
-            }
-            if (key.equals("UserName")) {
-                user.setName(value);
-            }
-        });
-        return user;
+
+    public boolean isKeyNumberExist(int keyNumber){
+        PasswordResetDTO passwordResetRequestDto = userDao.getPasswordResetRequest(keyNumber);
+        return passwordResetRequestDto != null ? true : false ;
     }
-    public String getTokenForgotPassword(int keyNumber) {
-        ForgotPasswordDTO forgotPassword = userDao.getForgotPassword(keyNumber);
-        if(forgotPassword != null){
-            String token = authorization.generateTokenForgotPassword(keyNumber);
+    public String generateTokenResetPassword(int keyNumber) {
+            String token = authorizationService.generateTokenResetPassword(keyNumber);
             return token;
-        }
-        else{
-            return null;
-        }
     }
-    public void resetPassWord(int numberKey ,String passWord) {
-        String email = userDao.getEmailByKey(numberKey);
-        userDao.resetPassWord(email, passWord);
-        userDao.deletePorgotPassword(email, numberKey);
+    public void resetPassWord(int keyNumber, String passWord) {
+        String email = userDao.getEmailByKey(keyNumber);
+        userDao.updatePasswordByMail(email, passWord);
+        userDao.deletePasswordReset(email, keyNumber);
+    }
+
+    private String generateToken(UserDTO user) {
+        return authorizationService.generateToken(user);
     }
 }

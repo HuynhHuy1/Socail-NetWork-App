@@ -8,11 +8,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.code.dto.CommentDTO;
-import com.example.code.dto.FriendShipDTO;
 import com.example.code.dto.LikeDTO;
 import com.example.code.dto.PostDTO;
 import com.example.code.dto.UserDTO;
 import com.example.code.util.FileUitl;
+import com.example.code.dao.CommentDao;
+import com.example.code.dao.FriendshipDao;
+import com.example.code.dao.LikeDao;
 import com.example.code.dao.PostDao;
 import com.example.code.dao.UserDao;
 
@@ -22,6 +24,12 @@ public class PostService {
     PostDao postDao;
     @Autowired
     UserDao userDao;
+    @Autowired
+    LikeDao likeDao;
+    @Autowired
+    CommentDao commentDao;
+    @Autowired
+    FriendshipDao friendshipDao;
     @Autowired
     AuthorizationService author;
     @Autowired
@@ -59,55 +67,10 @@ public class PostService {
     public void deletePost(int id, int userID) {
         postDao.deletePost(id, userID);
     }
-
-    public List<UserDTO> getUserByName(String userName) {
-        List<UserDTO> users = userDao.getUsersByName(userName);
-        return users;
-    }
-
     public List<PostDTO> getProfile(int userId) {
-        List<PostDTO> listPostDTO = postDao.getProFileByID(userId);
+        List<PostDTO> listPostDTO = userDao.getProFileByID(userId);
         return getBase64Post(listPostDTO);
-
     }
-
-    public List<FriendShipDTO> getFriendShipRequests(int user2ID) {
-        List<FriendShipDTO> listRequest = postDao.getFriendRequest(user2ID);
-        ;
-        return listRequest;
-    }
-
-    public void addFriend(int userID, int user2ID) {
-        FriendShipDTO friendShipDto = new FriendShipDTO();
-        friendShipDto.setUserID(userID);
-        friendShipDto.setUser2ID(user2ID);
-        postDao.insertFriend(friendShipDto);
-    }
-
-    public void updateStatusFriendRequest(int userID, int user2ID) {
-        FriendShipDTO friendShipDTO = new FriendShipDTO();
-        friendShipDTO.setUserID(userID);
-        friendShipDTO.setUser2ID(user2ID);
-        postDao.updateStatusFriendRequest(friendShipDTO);
-    }
-
-    public List<UserDTO> getFriend(int id) {
-        return postDao.getFriend(id);
-    }
-
-    public void deleteFriend(int userID, int user2ID) {
-        FriendShipDTO friendShipDto = new FriendShipDTO();
-        friendShipDto.setUserID(userID);
-        friendShipDto.setUser2ID(user2ID);
-        postDao.deleteFriend(friendShipDto);
-    }
-
-    public void updateUser(String UserName, String Avatar, String UserAddress, String UserPhone, String Email,
-            String PASSWORD, int id) {
-        UserDTO user = new UserDTO(id, UserName, Avatar, UserAddress, UserPhone, Email, PASSWORD);
-        postDao.updateUser(user);
-    }
-
     private List<PostDTO> getBase64Post(List<PostDTO> listPostDTO) {
         List<String> listImageBase64 = new ArrayList<>();
         List<PostDTO> listPostBase64 = new ArrayList<>();
@@ -139,48 +102,46 @@ public class PostService {
         }
         return listPath;
     }
-
-    public boolean changePassword(int userId, String oldPassWord, String passWord) {
-        UserDTO user = userDao.getUserByID(userId);
-        if (user.getPassword().equals(oldPassWord)) {
-            postDao.updatePassWord(passWord, userId);
-            return true;
-        }
-        return false;
-    }
-
+    // like
     public List<UserDTO> getUserLike(int postID) {
-        return postDao.getUserLike(postID);
+        return likeDao.getUserLike(postID);
     }
 
     public void createLike(int userID, int postID) {
-        LikeDTO likeDto = new LikeDTO(userID,postID);
-        postDao.insertLike(likeDto);
+        LikeDTO likeDto = new LikeDTO(userID, postID);
+        likeDao.insertLike(likeDto);
     }
 
     public void deleteLike(int postID, int userID) {
-        postDao.deleteLike(postID, userID);
+        likeDao.deleteLike(postID, userID);
+    }
+    public List<CommentDTO> getComment(int postID) {
+        return commentDao.getComment(postID);
     }
 
-    public List<CommentDTO> getComment(int postID) {
-        return postDao.getComment(postID);
-    }
+    // comment
 
     public void createComment(String content,int userID,int postID) {
-        PostDTO postDto = new PostDTO();
-        postDto.setContent(content);
-        postDto.setId(postID);
-        postDto.setUserID(userID);
-        postDao.insertComment(postDto);
+        CommentDTO commentDto = new CommentDTO();
+        commentDto.setContent(content);
+        commentDto.setId(postID);
+        commentDto.setUserID(userID);
+        commentDao.insertComment(commentDto);
     }
     public void updateComment(String content, int commentID, int userID) {
-        postDao.updateComment(content, commentID, userID);
+        CommentDTO commentDto = new CommentDTO();
+        commentDto.setContent(content);
+        commentDto.setId(commentID);
+        commentDto.setUserID(userID);
+
+        commentDao.updateComment(commentDto);
     }
 
     public void deleteComment(int postID, int userID) {
         CommentDTO commentDto = new CommentDTO();
         commentDto.setId(postID);
         commentDto.setUserID(userID);
-        postDao.deleteComment(postID, userID);
+        commentDao.deleteComment(commentDto);
     }
+
 }

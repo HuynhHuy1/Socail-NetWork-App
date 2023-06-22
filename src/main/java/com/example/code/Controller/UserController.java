@@ -13,24 +13,25 @@ import com.example.code.dto.PostDTO;
 import com.example.code.dto.ResponseDTO;
 import com.example.code.dto.UserDTO;
 import com.example.code.service.PostService;
+import com.example.code.service.UserService;
 
 @RestController
 @RequestMapping("api/users")
 public class UserController {
-
     @Autowired
     PostService postService;
+    @Autowired
+    UserService userService;
 
     @GetMapping("{name}")
     public ResponseEntity<ResponseDTO> getUsersByName(@PathVariable("name") String userName) {
         try {
-            List<UserDTO> listUser = postService.getUserByName(userName);
+            List<UserDTO> listUser = userService.getUserByName(userName);
             return ResponseEntity.ok().body(new ResponseDTO("True", "Lấy danh sách thành công", listUser));
         } catch (Exception e) {
             return ResponseEntity.ok().body(new ResponseDTO("True", "Lấy danh sách thất bại", ""));
         }
     }
-
     @GetMapping("profile/{id}")
     public ResponseEntity<ResponseDTO> getUserProfileByID(@PathVariable("id") int userID) {
         try {
@@ -40,5 +41,4 @@ public class UserController {
             return ResponseEntity.ok().body(new ResponseDTO("True", "Lấy profile thất bại", ""));
         }
     }
-
 }

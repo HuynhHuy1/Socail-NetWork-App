@@ -5,11 +5,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@NoArgsConstructor
-@AllArgsConstructor
 @Getter
 @Setter
-public class CommentDTO {
-    int id,userID;
-    String UserName, Content,Avatar;
+@AllArgsConstructor
+@NoArgsConstructor
+public class AuthenResponseDTO {
+    Boolean status;
+    String data;
 }

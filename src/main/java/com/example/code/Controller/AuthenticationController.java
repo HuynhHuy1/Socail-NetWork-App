@@ -1,6 +1,7 @@
 package com.example.code.controller;
 
 import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -8,58 +9,66 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.code.dto.AuthenResponseDTO;
 import com.example.code.dto.ResponseDTO;
+import com.example.code.dto.UserDTO;
 import com.example.code.service.AuthenticationService;
 
+import jakarta.validation.Valid;
+
 @RestController
-@RequestMapping("auth")
+@RequestMapping(value = "auth")
 public class AuthenticationController {
 
     @Autowired
-    private AuthenticationService authen;
+    private AuthenticationService authenticationService;
 
-    @PostMapping("signup")
-    public ResponseEntity<ResponseDTO> signUp(@RequestBody Map<String, String> userInfo) {
-        String token = authen.signUp(userInfo);
-        return token.equals("EmailError") ? ResponseEntity.status(HttpStatus.NON_AUTHORITATIVE_INFORMATION)
-                .body(new ResponseDTO("Failed", "Email đã tồn tại", ""))
-                : ResponseEntity.ok().body(new ResponseDTO("Ok", "Đăng ký thành công", token));
+    @PostMapping("signUp")
+    public ResponseEntity<ResponseDTO> signUp(@RequestBody @Valid UserDTO userDto) {
+        AuthenResponseDTO authenResponse = authenticationService.signUp(userDto);
+        return authenResponse.getStatus() ? ResponseEntity.status(HttpStatus.NON_AUTHORITATIVE_INFORMATION).body(
+                new ResponseDTO("Success", "Đăng ký thành công", authenResponse.getData()))
+                : ResponseEntity.status(HttpStatus.NON_AUTHORITATIVE_INFORMATION).body(
+                        new ResponseDTO("Failed", "Đăng ký không thành công", ""));
     }
 
     @PostMapping("login")
-    public ResponseEntity<ResponseDTO> login(@RequestBody Map<String, String> map) {
-        String token = authen.login(map);
-        if (token.equals("PasswordError") || token.equals("EmailError")) {
-            return ResponseEntity.status(HttpStatus.NON_AUTHORITATIVE_INFORMATION).body(
-                    new ResponseDTO("Failed", "Đăng nhập không thành công", ""));
-        } else {
-            return ResponseEntity.ok().body(
-                    new ResponseDTO("Ok", "Đăng nhập thành công", token));
-        }
+    public ResponseEntity<ResponseDTO> login(@RequestBody @Valid UserDTO userDto) {
+        AuthenResponseDTO authenResponse = authenticationService.login(userDto);
+        return authenResponse.getStatus() ? ResponseEntity.status(HttpStatus.NON_AUTHORITATIVE_INFORMATION).body(
+                new ResponseDTO("Success", "Đăng nhập thành công", authenResponse.getData()))
+                : ResponseEntity.status(HttpStatus.NON_AUTHORITATIVE_INFORMATION).body(
+                        new ResponseDTO("Failed", "Đăng nhập không thành công", ""));
     }
 
     @PostMapping("forgot-password")
-    public ResponseEntity<ResponseDTO> forgetPassword(@RequestParam("Email") String email) {
-        return authen.sendKeyNumbe(email)
-                ? ResponseEntity.ok().body(new ResponseDTO("True", "Đã gửi mã xác nhận về mail", ""))
-                : ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ResponseDTO("False", "Email bị sai", ""));
+    public ResponseEntity<ResponseDTO> forgotPassword(@RequestBody Map<String, String> mapEmail) {
+        String email = mapEmail.get("email");
+        if (authenticationService.isEmailExist(email)) {
+            authenticationService.sendConfirmationEmail(email);
+            return ResponseEntity.ok().body(new ResponseDTO("Success", "Thành công", ""));
+        } else
+            return ResponseEntity.ok().body(new ResponseDTO("Failed", "Thất bại", ""));
     }
 
     @PostMapping("check-key-number")
-    public ResponseEntity<ResponseDTO> checkKeyNumber(@RequestParam("KeyNumber") int keyNumber) {
-        String token = authen.getTokenForgotPassword(keyNumber);
-        return token != null ? ResponseEntity.ok().body(new ResponseDTO("True", "Đã gửi mã xác nhận về mail", token))
-                : ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ResponseDTO("False", "Thất bại", ""));
+    public ResponseEntity<ResponseDTO> checkKeyNumber(@RequestBody Map<String, Integer> mapKeyNumber) {
+        int keyNumber = mapKeyNumber.get("keyNumber");
+        if (authenticationService.isKeyNumberExist(keyNumber)) {
+            String token = authenticationService.generateTokenResetPassword(keyNumber);
+            return ResponseEntity.ok().body(new ResponseDTO("Success", "Thành công", token));
+        } else
+            return ResponseEntity.ok().body(new ResponseDTO("Failed", "Thất bại", ""));
     }
 
-    @PostMapping("reset-number")
-    public ResponseEntity<ResponseDTO> resetPassword(@RequestAttribute("keyNumber") int keyNumber,
-            @RequestParam("Password") String password) {
+    @PostMapping("reset-password")
+    public ResponseEntity<ResponseDTO> resetPassword(@RequestBody Map<String, String> mapPassword,
+            @RequestAttribute("keyNumber") int keyNumber) {
+        String password = mapPassword.get("password");
         try {
-            authen.resetPassWord(keyNumber, password);
+            authenticationService.resetPassWord(keyNumber, password);
             return ResponseEntity.ok().body(new ResponseDTO("True", "Cập nhật mậu khẩu thành công", ""));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
