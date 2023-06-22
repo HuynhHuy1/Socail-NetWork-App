@@ -9,8 +9,8 @@ import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 import org.springframework.stereotype.Repository;
 
+import com.example.code.dto.ForgotPasswordDTO;
 import com.example.code.dto.UserDTO;
-import com.example.code.model.ForgotPassword;
 
 @Repository
 @Mapper
@@ -61,7 +61,7 @@ public interface UserDao {
         
         @Select(" SELECT * FROM password_reset " +
                 " WHERE number_key = #{numberKey} ")
-        ForgotPassword getForgotPassword(int numberKey);
+        ForgotPasswordDTO getForgotPassword(int numberKey);
         
         @Select(" SELECT Email " +
                 " FROM password_reset " +

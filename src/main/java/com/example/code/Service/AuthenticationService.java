@@ -6,9 +6,9 @@ import java.util.Random;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.example.code.model.ForgotPassword;
 import com.example.code.util.DBUtil;
 import com.example.code.dao.UserDao;
+import com.example.code.dto.ForgotPasswordDTO;
 import com.example.code.dto.UserDTO;
 @Service
 public class AuthenticationService {
@@ -108,7 +108,7 @@ public class AuthenticationService {
         return user;
     }
     public String getTokenForgotPassword(int keyNumber) {
-        ForgotPassword forgotPassword = userDao.getForgotPassword(keyNumber);
+        ForgotPasswordDTO forgotPassword = userDao.getForgotPassword(keyNumber);
         if(forgotPassword != null){
             String token = authorization.generateTokenForgotPassword(keyNumber);
             return token;

@@ -1,4 +1,4 @@
-package com.example.code.model;
+package com.example.code.dto;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,7 +14,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class Response {
+public class ResponseDTO {
     private String Status, Message;
     private Object Data;
     public String toJsonString() {

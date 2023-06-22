@@ -1,6 +1,5 @@
 package com.example.code.config;
 
-
 import java.util.Properties;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -28,7 +27,7 @@ public class EmailConfig {
     @Bean
     public JavaMailSender javaMailSender() {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-        mailSender.setHost(host);   
+        mailSender.setHost(host);
         mailSender.setPort(port);
         mailSender.setUsername(username);
         mailSender.setPassword(password);

@@ -1,68 +1,44 @@
 package com.example.code.controller;
 
-import java.util.Map;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestAttribute;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.code.model.Response;
-import com.example.code.service.AuthenticationService;
+import com.example.code.dto.PostDTO;
+import com.example.code.dto.ResponseDTO;
+import com.example.code.dto.UserDTO;
+import com.example.code.service.PostService;
 
 @RestController
-@RequestMapping("User")
+@RequestMapping("api/users")
 public class UserController {
+
     @Autowired
-    private AuthenticationService authen;
+    PostService postService;
 
-    @PostMapping("Login")
-    public ResponseEntity<Response> login(@RequestBody Map<String, String> map) {
-        String token = authen.login(map);
-        if (token.equals("PasswordError") || token.equals("EmailError")) {
-            return ResponseEntity.status(HttpStatus.NON_AUTHORITATIVE_INFORMATION).body(
-                    new Response("Failed", "Đăng nhập không thành công", ""));
-        } else {
-            return ResponseEntity.ok().body(
-                    new Response("Ok", "Đăng nhập thành công", token));
-        }
-    }
-
-    @PostMapping("SignUp")
-    public ResponseEntity<Response> signUp(@RequestBody Map<String, String> userInfo) {
-        String token = authen.signUp(userInfo);
-        return token.equals("EmailError") ? ResponseEntity.status(HttpStatus.NON_AUTHORITATIVE_INFORMATION)
-                .body(new Response("Failed", "Email đã tồn tại", ""))
-                : ResponseEntity.ok().body(new Response("Ok", "Đăng ký thành công", token));
-    }
-
-    @PostMapping("ForgotPassWord")
-    public ResponseEntity<Response> forgetPassword(@RequestParam("email") String email) {
-        return authen.sendKeyNumbe(email)
-                ? ResponseEntity.ok().body(new Response("True", "Đã gửi mã xác nhận về mail", ""))
-                : ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("False", "Email bị sai", ""));
-    }
-
-    @PostMapping("CheckKeyNumber")
-    public ResponseEntity<Response> checkKeyNumber(@RequestParam("KeyNumber") int keyNumber) {
-        String token = authen.getTokenForgotPassword(keyNumber);
-        return token != null ? ResponseEntity.ok().body(new Response("True", "Đã gửi mã xác nhận về mail", token))
-                : ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("False", "Thất bại", ""));
-    }
-
-    @PostMapping("ResetPassword")
-    public ResponseEntity<Response> resetPassword(@RequestAttribute("numberKey") int numberKey,
-            @RequestParam("Password") String passWord) {
+    @GetMapping("{name}")
+    public ResponseEntity<ResponseDTO> getUsersByName(@PathVariable("name") String userName) {
         try {
-            authen.resetPassWord(numberKey, passWord);
-            return ResponseEntity.ok().body(new Response("True", "Cập nhật mậu khẩu thành công", ""));
+            List<UserDTO> listUser = postService.getUserByName(userName);
+            return ResponseEntity.ok().body(new ResponseDTO("True", "Lấy danh sách thành công", listUser));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new Response("False", "Cập nhật mật khẩu thất bại", ""));
+            return ResponseEntity.ok().body(new ResponseDTO("True", "Lấy danh sách thất bại", ""));
         }
     }
+
+    @GetMapping("profile/{id}")
+    public ResponseEntity<ResponseDTO> getUserProfileByID(@PathVariable("id") int userID) {
+        try {
+            List<PostDTO> listPost = postService.getProfile(userID);
+            return ResponseEntity.ok().body(new ResponseDTO("True", "Lấy profile thành công", listPost));
+        } catch (Exception e) {
+            return ResponseEntity.ok().body(new ResponseDTO("True", "Lấy profile thất bại", ""));
+        }
+    }
+
 }

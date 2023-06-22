@@ -13,7 +13,6 @@ import com.example.code.dto.LikeDTO;
 import com.example.code.dto.PostDTO;
 import com.example.code.dto.UserDTO;
 import com.example.code.util.FileUitl;
-import com.example.code.dao.InteractPostDAO;
 import com.example.code.dao.PostDao;
 import com.example.code.dao.UserDao;
 
@@ -27,8 +26,6 @@ public class PostService {
     AuthorizationService author;
     @Autowired
     FileUitl fileUitl;
-    @Autowired
-    InteractPostDAO interactDAO;
 
     public List<PostDTO> getPost(int id) {
         List<PostDTO> listPostDTO = postDao.getPostFriend(id);
@@ -41,7 +38,6 @@ public class PostService {
             int idStatus = postDao.getLastInsertedPostID();
             List<String> pathFiles = fileToPathString(images);
             pathFiles.forEach((path) -> postDao.insertPostDetail(idStatus, path));
-            ;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -75,7 +71,7 @@ public class PostService {
 
     }
 
-    public List<FriendShipDTO> getFriendRequest(int user2ID) {
+    public List<FriendShipDTO> getFriendShipRequests(int user2ID) {
         List<FriendShipDTO> listRequest = postDao.getFriendRequest(user2ID);
         ;
         return listRequest;
@@ -153,11 +149,11 @@ public class PostService {
         return false;
     }
 
-    public List<LikeDTO> getLike(int postID) {
-        return postDao.getLike(postID);
+    public List<UserDTO> getUserLike(int postID) {
+        return postDao.getUserLike(postID);
     }
 
-    public void createILike(int userID, int postID) {
+    public void createLike(int userID, int postID) {
         LikeDTO likeDto = new LikeDTO(userID,postID);
         postDao.insertLike(likeDto);
     }

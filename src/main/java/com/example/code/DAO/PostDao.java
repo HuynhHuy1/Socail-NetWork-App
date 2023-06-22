@@ -65,8 +65,8 @@ public interface PostDao {
         int getLastInsertedPostID();
 
         @Insert(" INSERT INTO post_files(post_id,post_file) " +
-                        " VALUES ( #{postID}, #{files} ) ")
-        void insertPostDetail(int id, String files);
+                        " VALUES ( #{postID}, #{postFile} ) ")
+        void insertPostDetail(int postID, String postFile);
 
         @Update(" UPDATE posts " +
                         " SET content=#{content}" +
@@ -138,11 +138,11 @@ public interface PostDao {
                         " WHERE user1_id = #{userID} AND user2_id = #{user2ID} OR user2_id = #{userID} AND user1_id = #{user2ID} ")
         void deleteFriend(FriendShipDTO friendShipDTO);
 
-        @Select(" SELECT u.name as UserName,u.avatar as avatar " +
+        @Select(" SELECT u.name as name,u.avatar as avatar " +
                         " FROM post_likes l " +
                         " INNER JOIN users u ON u.id = l.user_id " +
                         " WHERE l.post_id = #{postID} ")
-        List<LikeDTO> getLike(int postID);
+        List<UserDTO> getUserLike(int postID);         
 
         @Insert(" INSERT INTO post_likes(post_id,user_id) " +
                         " VALUES (#{postID},#{userID}) ")

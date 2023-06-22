@@ -11,10 +11,10 @@ import com.example.code.middleware.RequestFilter;
 @Configuration
 public class RequestFilterConfig implements WebMvcConfigurer {
     @Autowired
-    private RequestFilter customMiddleware;
+    private RequestFilter requestFilter;
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(customMiddleware);
+        registry.addInterceptor(requestFilter);
     }
 }
