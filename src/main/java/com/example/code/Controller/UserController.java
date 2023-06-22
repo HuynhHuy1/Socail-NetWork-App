@@ -11,14 +11,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.code.Model.Response;
-import com.example.code.Service.Authentication;
+import com.example.code.model.Response;
+import com.example.code.service.AuthenticationService;
 
 @RestController
 @RequestMapping("User")
 public class UserController {
     @Autowired
-    private Authentication authen;
+    private AuthenticationService authen;
 
     @PostMapping("Login")
     public ResponseEntity<Response> login(@RequestBody Map<String, String> map) {
@@ -34,7 +34,7 @@ public class UserController {
 
     @PostMapping("SignUp")
     public ResponseEntity<Response> signUp(@RequestBody Map<String, String> userInfo) {
-        String token = authen.singUp(userInfo);
+        String token = authen.signUp(userInfo);
         return token.equals("EmailError") ? ResponseEntity.status(HttpStatus.NON_AUTHORITATIVE_INFORMATION)
                 .body(new Response("Failed", "Email đã tồn tại", ""))
                 : ResponseEntity.ok().body(new Response("Ok", "Đăng ký thành công", token));
@@ -51,16 +51,18 @@ public class UserController {
     public ResponseEntity<Response> checkKeyNumber(@RequestParam("KeyNumber") int keyNumber) {
         String token = authen.getTokenForgotPassword(keyNumber);
         return token != null ? ResponseEntity.ok().body(new Response("True", "Đã gửi mã xác nhận về mail", token))
-        : ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("False", "Thất bại", ""));
-     }
+                : ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("False", "Thất bại", ""));
+    }
 
     @PostMapping("ResetPassword")
-    public ResponseEntity<Response> resetPassword(@RequestAttribute("numberKey") int numberKey,@RequestParam("Password") String passWord) {
+    public ResponseEntity<Response> resetPassword(@RequestAttribute("numberKey") int numberKey,
+            @RequestParam("Password") String passWord) {
         try {
-            authen.resetPassWord(numberKey,passWord);
-            return ResponseEntity.ok().body(new Response("True","Cập nhật mậu khẩu thành công",""));
+            authen.resetPassWord(numberKey, passWord);
+            return ResponseEntity.ok().body(new Response("True", "Cập nhật mậu khẩu thành công", ""));
         } catch (Exception e) {
-         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("False", "Cập nhật mật khẩu thất bại",""));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new Response("False", "Cập nhật mật khẩu thất bại", ""));
         }
     }
 }

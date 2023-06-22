@@ -1,47 +1,44 @@
-package com.example.code.Service;
+package com.example.code.service;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import com.example.code.DAO.UserDao;
-import com.example.code.EmailSerivce.EmailService;
-import com.example.code.Model.ForgotPassword;
-import com.example.code.Model.Response;
-import com.example.code.Model.User;
-import com.example.code.Util.DBUtil;
-import com.example.code.middleware.Authorization;
+
+import com.example.code.model.ForgotPassword;
+import com.example.code.util.DBUtil;
+import com.example.code.dao.UserDao;
+import com.example.code.dto.UserDTO;
 @Service
-public class Authentication {
+public class AuthenticationService {
     private final UserDao userDao;
     @Autowired
     private EmailService emailService;
     @Autowired
     DBUtil dbUtil;
     @Autowired
-    Authorization authorization;
+    AuthorizationService authorization;
 
-    public Authentication(UserDao userDao) {
+    public AuthenticationService(UserDao userDao) {
         this.userDao = userDao;
     }
     public String login(Map<String,String> map){
         String email = map.get("Email");
         String password = map.get("Password");
-        User user = dbUtil.getUserByEmail(email);
+        UserDTO user = dbUtil.getUserByEmail(email);
         if(user == null){
             return "EmailError";
         }
         else{
-            String value = user.getPASSWORD();
+            String value = user.getPassword();
             String token = authorization.generateToken(user);
             if(value.equals(password) ) return token;
             return "PasswordError";
         }
         }
-    public String singUp(Map<String, String> infoUser){
-        User user = dbUtil.getUserByEmail(infoUser.get("Email"));
+    public String signUp(Map<String, String> infoUser){
+        UserDTO user = dbUtil.getUserByEmail(infoUser.get("Email"));
         if(user == null){
             user = setUser(infoUser);
             userDao.insertUser(user);
@@ -52,7 +49,7 @@ public class Authentication {
         }
     }  
     public boolean forgetPassword(String email){
-        User user = dbUtil.getUserByEmail(email);
+        UserDTO user = dbUtil.getUserByEmail(email);
         if(user == null){
             return false;
         }
@@ -67,12 +64,12 @@ public class Authentication {
         String body = "Vui lòng nhấn vào link nào để thay đổi mật khẩu: http://localhost:8090/user/ResetPasswordForm" ;
         emailService.sendEmail(to, subject, body);
     }
-    public List<User> getAll(){
-        List<User> User = userDao.getUserAll();
+    public List<UserDTO> getAll(){
+        List<UserDTO> User = userDao.getUserAll();
         return User;
     }
     public boolean sendKeyNumbe(String email){
-        User user = userDao.getUserByEmail(email);
+        UserDTO user = userDao.getUserByEmail(email);
         int min = 100_000; // Giá trị tối thiểu (100000)
         int max = 999_999; // Giá trị tối đa (999999)
 
@@ -86,26 +83,26 @@ public class Authentication {
         }
         return false;
     }
-    public User setUser(Map<String, String> infoUser){
-        User user = new User();
+    public UserDTO setUser(Map<String, String> infoUser){
+        UserDTO user = new UserDTO();
         infoUser.forEach((key, value) -> {
             if (key.equals("Email")) {
                 user.setEmail(value);
             }
             if (key.equals("Password")) {
-                user.setPASSWORD(value);
+                user.setPassword(value);
             }
             if (key.equals("Avatar")) {
                 user.setAvatar(value);
             }
             if (key.equals("UserPhone")) {
-                user.setUserPhone(value);
+                user.setPhone(value);
             }
             if (key.equals("UserAddress")) {
-                user.setUserAddress(value);
+                user.setAddress(value);
             }
             if (key.equals("UserName")) {
-                user.setUserName(value);
+                user.setName(value);
             }
         });
         return user;

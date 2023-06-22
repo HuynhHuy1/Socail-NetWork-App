@@ -1,4 +1,4 @@
-package com.example.code.Util;
+package com.example.code.util;
 
 import java.nio.file.Files;
 import java.nio.file.Path;

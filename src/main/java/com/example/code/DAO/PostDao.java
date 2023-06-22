@@ -1,137 +1,174 @@
-package com.example.code.DAO;
+package com.example.code.dao;
 
 import java.util.List;
 
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 import org.springframework.stereotype.Repository;
 
-import com.example.code.DTO.Friend_Request;
-import com.example.code.DTO.PostDTO;
-import com.example.code.Model.User;
+import com.example.code.dto.CommentDTO;
+import com.example.code.dto.FriendShipDTO;
+import com.example.code.dto.LikeDTO;
+import com.example.code.dto.PostDTO;
+import com.example.code.dto.UserDTO;
 
 @Repository
 @Mapper
 public interface PostDao {
-        @Select(        " SELECT  p.PostID as PostID, u.UserName as UserName, p.Content as Content , cm.CommentNumber as CommentCount , l.LikeNumber as LikeCount, p.TimeCreate as TimeCreate  " +
-                        " FROM Posts p " +
-                        " INNER JOIN Friends f ON f.UserIDSend = p.UserID " +
-                        " INNER JOIN Users u ON u.UserID = p.UserID " +
+        @Select(" SELECT  p.id as PostID, u.name as UserName, p.content as Content , cm.CommentNumber as CommentCount , l.LikeNumber as LikeCount, p.create_at as TimeCreate  "
+                        +
+                        " FROM posts p " +
+                        " INNER JOIN friendships f ON f.user2_id = p.user_id " +
+                        " INNER JOIN users u ON u.id = p.user_id " +
                         " LEFT JOIN ( " +
-                        " SELECT PostID, COUNT(PostID) as LikeNumber " +
-                        " FROM Post_likes " +
-                        " GROUP BY PostID " +
-                        " ) l ON p.PostID = l.PostID " +
+                        " SELECT post_id, COUNT(post_id) as LikeNumber " +
+                        " FROM post_likes " +
+                        " GROUP BY post_id " +
+                        " ) l ON p.id = l.post_id " +
                         " LEFT JOIN( " +
-                        " SELECT PostID, COUNT(PostID) as CommentNumber " +
-                        " FROM Post_Comment " + 
-                        " GROUP BY PostID " +
-                        " ) cm ON cm.PostID = p.PostID " + 
-                        " WHERE f.UserID = #{id} AND f.Status = 1 " +
+                        " SELECT post_id, COUNT(post_id) as CommentNumber " +
+                        " FROM post_comments " +
+                        " GROUP BY post_id " +
+                        " ) cm ON cm.post_id = p.id " +
+                        " WHERE f.user1_id = #{id} AND f.status = 1 " +
                         " UNION " +
-                        " SELECT  p.PostID as PostID, u.UserName as UserName, p.Content as Content , cm.CommentNumber as CommentCount , l.LikeNumber as LikeCount, p.TimeCreate as TimeCreate  " +
-                        " FROM Posts p " +
-                        " INNER JOIN Friends f ON f.UserID = p.UserID " +
-                        " INNER JOIN Users u ON u.UserID = p.UserID " +
+                        " SELECT  p.id as PostID, u.name as UserName, p.content as Content , cm.CommentNumber as CommentCount , l.LikeNumber as LikeCount,p.create_at as TimeCreate  "
++
+                        " FROM posts p " +
+                        " INNER JOIN friendships f ON f.user1_id = p.user_id " +
+                        " INNER JOIN users u ON u.id = p.user_id " +
                         " LEFT JOIN ( " +
-                        " SELECT PostID, COUNT(PostID) LikeNumber " +
-                        " FROM Post_likes " +
-                        " GROUP BY PostID " +
-                        " ) l ON p.PostID = l.PostID " +
+                        " SELECT post_id, COUNT(post_id) LikeNumber " +
+                        " FROM post_likes " +
+                        " GROUP BY post_id " +
+                        " ) l ON p.id = l.post_id " +
                         " LEFT JOIN( " +
-                        " SELECT PostID, COUNT(PostID) CommentNumber " +
-                        " FROM Post_Comment " +
-                        " GROUP BY PostID " +
-                        " ) cm ON cm.PostID = p.PostID " +
-                        " WHERE f.UserIDSend = #{id} AND f.Status = 1 ")
-        List<PostDTO> getPostFriend(@Param("id") int userID);
+                        " SELECT post_id, COUNT(post_id) CommentNumber " +
+                        " FROM post_comments " +
+                        " GROUP BY post_id " +
+                        " ) cm ON cm.post_id = p.id " +
+                        " WHERE f.user2_id = #{id} AND f.Status = 1 ")
+        List<PostDTO> getPostFriend(int userID);
 
-        @Select(        " SELECT post_file FROM Post_files " +
-                        " WHERE PostID = #{PostID} ")
-        List<String> getPostDetail(@Param("PostID") int PostID);
+        @Select(" SELECT post_file FROM post_files " +
+                        " WHERE post_id = #{postID} ")
+        List<String> getPostDetail(int postID);
 
-        @Insert(        " INSERT INTO `Posts`(`Content`, `UserID`) " +
-                        " VALUES ( #{Content} , #{UserID})")
-        void insertPost(@Param("Content") String content,@Param("UserID") int id);
+        @Insert(" INSERT INTO posts(content, user_id) " +
+                        " VALUES ( #{content} , #{userID})")
+        void insertPost(String content, int userID);
 
         @Select("SELECT LAST_INSERT_ID()")
-        int getLastInsertedPostID();    
+        int getLastInsertedPostID();
 
-        @Insert(        " INSERT INTO Post_files(PostID,Post_file) " +
-                        " VALUES ( #{PostID}, #{Image} ) ")
-        void insertPostDetail(@Param("PostID") int id,@Param("Image") String image);
+        @Insert(" INSERT INTO post_files(post_id,post_file) " +
+                        " VALUES ( #{postID}, #{files} ) ")
+        void insertPostDetail(int id, String files);
 
-        @Update(        " UPDATE `Posts` " +
-                        " SET Content=#{Content}" +
-                        " WHERE PostID = #{ID}")
-        void updatePost(@Param("Content") String content, @Param("ID") int id);
+        @Update(" UPDATE posts " +
+                        " SET content=#{content}" +
+                        " WHERE id = #{id}")
+        void updatePost(String content, int id);
+ 
+        @Delete(" DELETE FROM posts " +
+                        " WHERE id = #{id} AND user_id = #{userID} ")
+        void deletePost(int id, int userID);
 
+        @Delete(" DELETE FROM post_files " +
+                        " WHERE post_id = #{postID}")
+        void deletePostDetail(int postID);
 
-        @Delete(        " DELETE FROM Posts " +
-                        " WHERE PostID = #{ID} AND UserID = #{UserID} ")
-        void deletePost(@Param("ID") int id, @Param("UserID") int userID);
-        
-        @Delete(        " DELETE FROM PostDetail " +
-                        " WHERE PostID = #{PostID}")
-        void deletePostDetail(@Param("PostID") int PostId);
-
-        @Select(        " SELECT  p.PostID as PostID, u.UserName as UserName, p.Content as Content , cm.CommentNumber as CommentCount , l.LikeNumber as LikeCount, p.TimeCreate as TimeCreate  " +
-                        " FROM Posts p " +
-                        " INNER JOIN Users u ON u.UserID = p.UserID " +
+        @Select(" SELECT  p.id as id, u.name as UserName, p.content as Content , cm.CommentNumber as CommentCount , l.LikeNumber as LikeCount, p.create_at as TimeCreate  "
+                        +
+                        " FROM posts p " +
+                        " INNER JOIN users u ON u.id = p.user_id " +
                         " LEFT JOIN ( " +
-                        " SELECT PostID, COUNT(PostID) as LikeNumber " +
-                        " FROM Post_likes " +
-                        " GROUP BY PostID " +
-                        " ) l ON p.PostID = l.PostID " +
+                        " SELECT post_id, COUNT(post_id) as LikeNumber " +
+                        " FROM post_likes " +
+                        " GROUP BY post_id " +
+                        " ) l ON p.id = l.post_id " +
                         " LEFT JOIN( " +
-                        " SELECT PostID, COUNT(PostID) as CommentNumber " +
-                        " FROM Post_Comment " + 
-                        " GROUP BY PostID " +
-                        " ) cm ON cm.PostID = p.PostID " + 
-                        " WHERE u.UserID = #{userID}" )
-        List<PostDTO> getProFileByID(@Param("userID") int id);
+                        " SELECT post_id, COUNT(post_id) as CommentNumber " +
+                        " FROM post_likes " +
+                        " GROUP BY post_id " +
+                        " ) cm ON cm.post_id = p.id " +
+                        " WHERE u.id = #{userID}")
+        List<PostDTO> getProFileByID(int userID);
 
-        @Select(        " SELECT u.UserName as UserName, f.UserIDSend as UserIDSend, f.Status as Status " +
-                        " FROM Friends f " +
-                        " INNER JOIN Users u ON u.UserID = f.UserIDSend " +
-                        " WHERE f.UserID = #{UserID} AND f.Status = 0 ")
-        List<Friend_Request> getFriendRequest(@Param("UserID") int userID);
+        @Select(" SELECT u.name as UserName, f.user2_id as UserSend, f.status as Status " +
+                        " FROM friendships f " +
+                        " INNER JOIN users u ON u.id = f.user2_id " +
+                        " WHERE f.user1_id = #{userID} AND f.status = 0 ")
+        List<FriendShipDTO> getFriendRequest(int userID);
 
-        @Insert(        " INSERT INTO Friends (UserID,UserIDSend,Status)" +
-                        " VAlUES (#{UserID},#{UserSendID},0)" )
-        void insertFriends(@Param("UserID")int userID,@Param("UserSendID") int userSendID);
-                
-        @Update(        " UPDATE Friends SET Status = #{Status} " +
-                        " WHERE UserID = #{userID} AND UserIDSend = #{userSendID}")
-        void updateStatusFriendRequest(@Param("userID")int userID,@Param("userSendID") int userSendID,@Param("Status") int status);
+        @Insert(" INSERT INTO friendships (user1_id,user2_id,status)" +
+                        " VAlUES (#{userID},#{user2ID},0)") 
+        void insertFriend(FriendShipDTO friendShipDto);
 
-        @Select(        " SELECT u.UserID,u.UserName,u.Avatar,u.UserAddress,u.UserPhone,u.Email,u.PASSWORD " +
-                        " FROM Friends af " +
-                        " INNER JOIN Users u ON af.UserID = u.UserID " +
-                        " WHERE af.UserIDSend = #{id} and Status = 1 " +
+        @Update(" UPDATE friendships SET status = 1 " +
+                        " WHERE user1_id = #{userID} AND user2_id = #{user2ID}")
+        void updateStatusFriendRequest(FriendShipDTO friendShipDTO);
+
+        @Select(" SELECT u.id,u.name,u.avatar,u.address,u.phone,u.email,u.password " +
+                        " FROM friendships af " +
+                        " INNER JOIN users u ON af.user1_id = u.id " +
+                        " WHERE af.user2_id = #{id} and status = 1 " +
                         " UNION " +
-                        " SELECT u.UserID,u.UserName,u.Avatar,u.UserAddress,u.UserPhone,u.Email,u.PASSWORD " +
-                        " FROM Friends af " +
-                        " INNER JOIN Users u ON af.UserIDSend = u.UserID " +
-                        " WHERE af.UserID = #{id} and Status = 1 " )
-        List<User> getFriend(@Param("id") int id);
+                        " SELECT u.id,u.name,u.avatar,u.address,u.phone,u.email,u.password " +
+                        " FROM friendships af " +
+                        " INNER JOIN users u ON af.user2_id = u.id " +
+                        " WHERE af.user1_id = #{id} and status = 1 ")
+        List<UserDTO> getFriend(int id);
 
-        @Update(        " UPDATE `Users` " +
-                        " SET `UserName`= #{UserName},`Avatar`=#{Avatar},`UserAddress`=#{UserAddress},`UserPhone`=#{UserPhone}" +  
-                        " WHERE Users.UserID = #{UserID} ")
-        void updateUser(User user);
-        
-        @Update(" UPDATE sers " + 
-        " SET PASSWORD = #{password} " +
-        " WHERE UserID = #{userID} "
-        )
-        void updatePassWord(@Param("password") String password,@Param("userID")  int userID);
+        @Update(" UPDATE users " +
+                        " SET name= #{name},avatar=#{avatar},address=#{address},phone=#{phone}"
+                        +
+                        " WHERE users.id = #{id} ")
+        void updateUser(UserDTO user);
 
-        @Delete(" DELETE FROM `Friends` " +
-                " WHERE UserID = #{UserID} AND UserIDSend = #{UserIDSend} OR UserIDSend = #{UserID} AND UserID = #{UserIDSend} ")
-        void deleteFriend(int UserID, int UserIDSend);
+        @Update(" UPDATE users " +
+                        " SET password = #{password} " +
+                        " WHERE id = #{userID} ")
+        void updatePassWord(String password, int userID);
+
+        @Delete(" DELETE FROM friendships " +
+                        " WHERE user1_id = #{userID} AND user2_id = #{user2ID} OR user2_id = #{userID} AND user1_id = #{user2ID} ")
+        void deleteFriend(FriendShipDTO friendShipDTO);
+
+        @Select(" SELECT u.name as UserName,u.avatar as avatar " +
+                        " FROM post_likes l " +
+                        " INNER JOIN users u ON u.id = l.user_id " +
+                        " WHERE l.post_id = #{postID} ")
+        List<LikeDTO> getLike(int postID);
+
+        @Insert(" INSERT INTO post_likes(post_id,user_id) " +
+                        " VALUES (#{postID},#{userID}) ")
+        void insertLike(LikeDTO likeDTO);
+
+        @Delete(" DELETE FROM post_likes " +
+                        " WHERE post_id = #{postID} and user_id = #{userID} ")
+        void deleteLike(int postID, int userID);
+
+        @Select(" SELECT u.name as UserName,u.avatar as avatar, cm.content as Content , cm.id as CommentID "
+                        +
+                        " FROM post_comments cm " +
+                        " INNER JOIN users u ON u.id = cm.user_id " +
+                        " WHERE cm.post_id = #{postID}")
+        List<CommentDTO> getComment(int postID);
+
+        @Insert(" INSERT INTO post_comments(content,user_id,post_id) " +
+                        " VALUES (#{content},#{userID},#{id})")
+        void insertComment(PostDTO postDto);
+
+        @Update(" UPDATE post_comments " +
+                        " SET content =  #{content} " +
+                        " WHERE id = #{commentID} AND user_id = #{userID}")
+        void updateComment(String content, int commentID, int userID);
+
+        @Delete(" DELETE FROM post_comments " +
+                        " WHERE id = #{id} AND user_id = #{userID} ")
+        void deleteComment(int id, int userID);
 }

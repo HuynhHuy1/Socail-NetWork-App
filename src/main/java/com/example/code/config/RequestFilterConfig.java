@@ -1,4 +1,4 @@
-package com.example.code;
+package com.example.code.config;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,13 +9,12 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import com.example.code.middleware.RequestFilter;
 
 @Configuration
-public class Webconfig implements WebMvcConfigurer {
+public class RequestFilterConfig implements WebMvcConfigurer {
     @Autowired
     private RequestFilter customMiddleware;
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        // Đăng ký middleware vào registry
         registry.addInterceptor(customMiddleware);
     }
 }

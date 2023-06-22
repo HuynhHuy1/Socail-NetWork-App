@@ -1,80 +1,81 @@
-package com.example.code.DAO;
+package com.example.code.dao;
 
 import java.util.List;
 
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 import org.springframework.stereotype.Repository;
 
-import com.example.code.Model.ForgotPassword;
-import com.example.code.Model.User;
+import com.example.code.dto.UserDTO;
+import com.example.code.model.ForgotPassword;
 
 @Repository
 @Mapper
 public interface UserDao {
-        @Select("SELECT * FROM Users")
-        List<User> getUserAll();
 
-        @Select(" SELECT * FROM Users " +
-        " WHERE UserID = #{id} ")
-        User getUserByID(@Param("id") int id);
+        @Select("SELECT * FROM users")
+        List<UserDTO> getUserAll();
+
+        @Select(" SELECT * FROM users " +
+                " WHERE id = #{id} ")
+        UserDTO getUserByID( int id);
 
 
-        @Select(" SELECT * FROM Users " +
-                " WHERE Email = #{email} ")
-        User getUserByEmail(@Param("email") String email);
+        @Select(" SELECT * FROM users " +
+                " WHERE email = #{email} ")
+        UserDTO getUserByEmail( String email);
         
-        @Insert(" INSERT INTO Users (UserName, Avatar, UserAddress, UserPhone, Email, PASSWORD) " +
-                " VALUES (#{UserName}, #{Avatar}, #{UserAddress}, #{UserPhone}, #{Email}, #{PASSWORD}) ")
-        void insertUser(User user);
-        @Update(" UPDATE Users " +
-                " SET UserName = #{name},Avatar = #{avatar},UserAddress = #{address},UserPhone = #{phone},Email = #{email},PASSWORD =#{password}" +
+        @Insert(" INSERT INTO users (name, avatar, address, phone, email, password) " +
+                " VALUES (#{name}, #{avatar}, #{address}, #{phone}, #{email}, #{password}) ")
+        void insertUser(UserDTO user);
+
+        @Update(" UPDATE users " +
+                " SET name = #{name},avatar = #{avatar},address = #{address},phone = #{phone},email = #{email},password=#{password}" +
                 " WHERE id = #{id}")
-        void updateUser(User user,@Param("id") int id);
-        @Update(" UPDATE Users " + 
-                " SET PASSWORD = #{password} " +
-                " WHERE Email = #{email} "
+        void updateUser(UserDTO user);
+
+        @Update(" UPDATE users " + 
+                " SET password = #{password} " +
+                " WHERE email = #{email} "
                 )
-        void updatePassWord(@Param("password") String password,@Param("email")  String Email);
+        void updatePassWord( String password,  String email);
 
-        @Delete(" DELETE * FROM Users " +
+        @Delete(" DELETE * FROM users " +
                 " where id = #{id} ")
-        void delete(@Param("id") int id );
+        void delete( int id );
 
-        @Select(" SELECT UserID FROM Users " +
-                " WHERE Email = #{Email} ")
-        int getIDByEmail(@Param("Email") String email);
+        @Select(" SELECT id FROM users " +
+                " WHERE email = #{email} ")
+        int getIDByEmail( String email);
 
-        @Select(" SELECT * " +
-                " FROM Users " +
-                " WHERE UserName LIKE '%' || #{UserName} || '%' ")
-        List<User> getUsersByName(@Param("UserName") String userName);
+        @Select(" SELECT * FROM users " +
+                " WHERE name LIKE CONCAT('%', #{userName}, '%')")
+        List<UserDTO> getUsersByName(String userName);
 
-        @Insert(" INSERT INTO `ForgotPassword`(`Email`, `NumberKey`) " +
-                " VALUES (#{Email},#{NumberKey})")
-        void generateKey(@Param("Email") String email, @Param("NumberKey") int numberKey);
+        @Insert(" INSERT INTO password_reset (email, number_key) " +
+                " VALUES (#{email},#{numberKey})")
+        void generateKey(String email,int numberKey);
         
-        @Select(" SELECT * FROM `ForgotPassword` " +
-                " WHERE NumberKey = #{NumberKey} ")
-        ForgotPassword getForgotPassword(int NumberKey);
+        @Select(" SELECT * FROM password_reset " +
+                " WHERE number_key = #{numberKey} ")
+        ForgotPassword getForgotPassword(int numberKey);
         
         @Select(" SELECT Email " +
-                " FROM ForgotPassword " +
-                " WHERE NumberKey = #{numberKey} ")
+                " FROM password_reset " +
+                " WHERE number_ = #{numberKey} ")
         String getEmailByKey(int numberKey);
 
-        @Update(" UPDATE Users " + 
-                " SET PASSWORD = #{Password} " +
-                " WHERE Email = #{Email}")
-        void resetPassWord(String Email ,String Password);
+        @Update(" UPDATE users " + 
+                " SET password = #{password} " +
+                " WHERE email = #{email}")
+        void resetPassWord(String email ,String password);
         
         @Delete(" DELETE " +
-                " FROM `ForgotPassword` " +
-                " WHERE Email = #{Email} And NumberKey = #{NumberKey} ")
-        void deletePorgotPassword(String Email, int NumberKey );
+                " FROM password_reset " +
+                " WHERE email = #{email} And number_key = #{numberKey} ")
+        void deletePorgotPassword(String email, int numberKey );
 
 }

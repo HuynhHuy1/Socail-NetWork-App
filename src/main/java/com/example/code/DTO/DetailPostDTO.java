@@ -1,4 +1,4 @@
-package com.example.code.Model;
+package com.example.code.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,7 +9,6 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
-    private int UserID;
-    private String UserName, Avatar, UserAddress, UserPhone, Email, PASSWORD;
+public class DetailPostDTO {
+    String id, statusID, image;
 }

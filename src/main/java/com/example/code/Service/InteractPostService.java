@@ -1,13 +1,12 @@
-package com.example.code.Service;
+package com.example.code.service;
 
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.example.code.DAO.InteractPostDAO;
-import com.example.code.DTO.CommentDTO;
-import com.example.code.DTO.LikeDTO;
+import com.example.code.dto.*;
+import com.example.code.dao.InteractPostDAO;
 
 @Service 
 public class InteractPostService  {

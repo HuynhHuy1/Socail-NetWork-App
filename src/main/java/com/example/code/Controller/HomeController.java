@@ -17,39 +17,39 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.example.code.DTO.CommentDTO;
-import com.example.code.DTO.Friend_Request;
-import com.example.code.DTO.LikeDTO;
-import com.example.code.DTO.PostDTO;
-import com.example.code.Model.Response;
-import com.example.code.Model.User;
-import com.example.code.Service.InteractPostService;
-import com.example.code.Service.PostService;
-import com.example.code.Util.FileUitl;
-import com.example.code.middleware.Authorization;
+import com.example.code.dto.CommentDTO;
+import com.example.code.dto.FriendShipDTO;
+import com.example.code.dto.LikeDTO;
+import com.example.code.dto.PostDTO;
+import com.example.code.dto.UserDTO;
+import com.example.code.model.Response;
+import com.example.code.service.AuthorizationService;
+import com.example.code.service.InteractPostService;
+import com.example.code.service.PostService;
+import com.example.code.util.FileUitl;
 
 @RestController
 @RequestMapping("Api/Home")
 public class HomeController {
     @Autowired
-    PostService homeService;
+    PostService postService;
     @Autowired
-    Authorization author;
+    AuthorizationService author;
     @Autowired
     InteractPostService interactPostService;
 
     @GetMapping("PostFriend")
     ResponseEntity<Response> GetPostFriend(@RequestAttribute("userID") int id) {
-        List<PostDTO> postDTO = homeService.getPost(id);
+        List<PostDTO> postDTO = postService.getPost(id);
         return ResponseEntity.ok().body(
                 new Response("True", " Lấy thành công danh sách ", postDTO));
     }
-    
+
     @PostMapping("Post")
     ResponseEntity<Response> uploadPost(@RequestAttribute("userID") int id,
             @RequestParam("Images") MultipartFile[] images, @RequestParam("Content") String content) {
         try {
-            homeService.insertPost(content, images, id);
+            postService.insertPost(content, images, id);
             return ResponseEntity.ok().body(
                     new Response("Ok", "Upload bài viết thành công", ""));
         } catch (Exception e) {
@@ -62,7 +62,7 @@ public class HomeController {
     ResponseEntity<Response> updatePost(@RequestParam("Images") MultipartFile[] images,
             @RequestParam("Content") String content, @PathVariable("id") int statusId) {
         try {
-            homeService.updatePost(images, content, statusId);
+            postService.updatePost(images, content, statusId);
             return ResponseEntity.ok().body(
                     new Response("True", "Update bài viết thành công", ""));
         } catch (Exception e) {
@@ -74,7 +74,7 @@ public class HomeController {
     @DeleteMapping("Post/{id}")
     ResponseEntity<Response> deletePost(@PathVariable("id") int id, @RequestAttribute("userID") int userID) {
         try {
-            homeService.deletePost(id, userID);
+            postService.deletePost(id, userID);
             return ResponseEntity.ok().body(
                     new Response("True", "Xoá bài viết thành công", ""));
         } catch (Exception e) {
@@ -86,7 +86,7 @@ public class HomeController {
     @GetMapping("Like/{postId}")
     ResponseEntity<Response> getLike(@PathVariable("postId") int postID) {
         try {
-            List<LikeDTO> listLike = interactPostService.getLike(postID);
+            List<LikeDTO> listLike = postService.getLike(postID);
             return ResponseEntity.ok().body(
                     new Response("True", "Lấy danh sách thành công", listLike));
         } catch (Exception e) {
@@ -98,7 +98,7 @@ public class HomeController {
     @PostMapping("Like/{postId}")
     ResponseEntity<Response> like(@RequestAttribute("userID") int userID, @PathVariable("postId") int postID) {
         try {
-            interactPostService.createILike(postID, userID);
+            postService.createILike(userID,postID);
             return ResponseEntity.ok().body(
                     new Response("True", "Thích bài viết thành công", ""));
         } catch (Exception e) {
@@ -110,7 +110,7 @@ public class HomeController {
     @DeleteMapping("Like/{postId}")
     ResponseEntity<Response> unLike(@RequestAttribute("userID") int userID, @PathVariable("postId") int postID) {
         try {
-            interactPostService.deleteLike(postID, userID);
+            postService.deleteLike(postID, userID);
             return ResponseEntity.ok().body(
                     new Response("True", "Huỷ Thích bài viết thành công", ""));
         } catch (Exception e) {
@@ -122,7 +122,7 @@ public class HomeController {
     @GetMapping("Comment/{postID}")
     ResponseEntity<Response> getcomment(@PathVariable("postID") int postID) {
         try {
-            List<CommentDTO> listComment = interactPostService.getComment(postID);
+            List<CommentDTO> listComment = postService.getComment(postID);
             return ResponseEntity.ok().body(
                     new Response("True", "Lấy danh sách bình luận thành công", listComment));
         } catch (Exception e) {
@@ -135,7 +135,7 @@ public class HomeController {
     ResponseEntity<Response> comment(@RequestParam("Content") String content, @RequestAttribute("userID") int userID,
             @PathVariable("postID") int postID) {
         try {
-            interactPostService.createComment(content, userID, postID);
+            postService.createComment(content, userID, postID);
             return ResponseEntity.ok().body(
                     new Response("True", "Bình luận thành công", ""));
         } catch (Exception e) {
@@ -148,7 +148,7 @@ public class HomeController {
     ResponseEntity<Response> updateComment(@RequestParam("Content") String content,
             @PathVariable("commentID") int commmentID, @RequestAttribute("userID") int userID) {
         try {
-            interactPostService.updateComment(content, commmentID, userID);
+            postService.updateComment(content, commmentID, userID);
             return ResponseEntity.ok().body(
                     new Response("True", "Sửa bình luận thành công", ""));
         } catch (Exception e) {
@@ -161,7 +161,7 @@ public class HomeController {
     ResponseEntity<Response> deleteComment(@PathVariable("commentID") int commentID,
             @RequestAttribute("userID") int userID) {
         try {
-            interactPostService.deleteComment(commentID, userID);
+            postService.deleteComment(commentID, userID);
             return ResponseEntity.ok().body(
                     new Response("True", "Xoá bình luận thành công", ""));
         } catch (Exception e) {
@@ -184,7 +184,7 @@ public class HomeController {
     @GetMapping("User/{UserName}")
     public ResponseEntity<Response> getUserByName(@PathVariable("UserName") String userName) {
         try {
-            List<User> listUser = homeService.getUserByName(userName);
+            List<UserDTO> listUser = postService.getUserByName(userName);
             return ResponseEntity.ok().body(new Response("True", "Lấy danh sách thành công", listUser));
         } catch (Exception e) {
             return ResponseEntity.ok().body(new Response("True", "Lấy danh sách thất bại", ""));
@@ -195,7 +195,7 @@ public class HomeController {
     @GetMapping("Profile/{UserID}")
     public ResponseEntity<Response> getProfileByID(@PathVariable("UserID") int userID) {
         try {
-            List<PostDTO> listPostDTO = homeService.getProfile(userID);
+            List<PostDTO> listPostDTO = postService.getProfile(userID);
             return ResponseEntity.ok().body(new Response("True", "Lấy profile thành công", listPostDTO));
         } catch (Exception e) {
             return ResponseEntity.ok().body(new Response("True", "Lấy profile thất bại", ""));
@@ -205,7 +205,7 @@ public class HomeController {
     @GetMapping("FriendRequest")
     public ResponseEntity<Response> getRequestFriend(@RequestAttribute("userID") int userID) {
         try {
-            List<Friend_Request> listRequest = homeService.getFriendRequest(userID);
+            List<FriendShipDTO> listRequest = postService.getFriendRequest(userID);
             return ResponseEntity.ok()
                     .body(new Response("True", "Lấy danh sách lời mời kết bạn thành công", listRequest));
         } catch (Exception e) {
@@ -214,33 +214,33 @@ public class HomeController {
         }
     }
 
-    @PostMapping("FriendRequest/{UserSendID}")
+    @PostMapping("FriendRequest/{User2ID}")
     public ResponseEntity<Response> addFriend(@RequestAttribute("userID") int userID,
-            @PathVariable("UserSendID") int userSendID) {
+            @PathVariable("User2ID") int user2ID) {
         try {
-            homeService.addFriend(userID, userSendID);
+            postService.addFriend(userID, user2ID);
             return ResponseEntity.ok().body(new Response("True", "thêm bạn bè thành công", ""));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new Response("False", "thêm bạn bè thất bại", ""));
         }
     }
-
-    @PutMapping("FriendRequest/{UserSendID}")
+    
+    @PutMapping("FriendRequest/{User2ID}")
     public ResponseEntity<Response> updateFriendRequest(@RequestAttribute("userID") int userID,
-            @PathVariable("UserSendID") int userSendID, @RequestParam("Status") int status) {
+            @PathVariable("User2ID") int user2ID) {
         try {
-            homeService.updateStatusFriendRequest(userID, userSendID, status);
+            postService.updateStatusFriendRequest(userID, user2ID);
             return ResponseEntity.ok().body(new Response("True", "Phản hồi thành công", ""));
         } catch (Exception e) {
             return ResponseEntity.ok().body(new Response("False", "Phản hồi thất bại", ""));
         }
     }
 
-    @DeleteMapping("Friend/{FriendID}")
+    @DeleteMapping("Friend/{user2ID}")
     public ResponseEntity<Response> deleteFriend(@RequestAttribute("userID") int userID,
-            @PathVariable("FriendID") int friendID) {
+            @PathVariable("user2ID") int user2ID) {
         try {
-            homeService.deleteFriend(userID, friendID);
+            postService.deleteFriend(userID, user2ID);
             return ResponseEntity.ok().body(new Response("True", "Xoá bạn thành công", ""));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new Response("False", "Lấy danh sách bạn thất bại", ""));
@@ -250,7 +250,7 @@ public class HomeController {
     @GetMapping("Friend")
     public ResponseEntity<Response> getFriend(@RequestAttribute("userID") int userID) {
         try {
-            List<User> listFriend = homeService.getFriend(userID);
+            List<UserDTO> listFriend = postService.getFriend(userID);
             return ResponseEntity.ok().body(new Response("True", "Lấy danh sách bạn thành công", listFriend));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new Response("False", "Lấy danh sách bạn thất bại", ""));
@@ -261,7 +261,7 @@ public class HomeController {
     public ResponseEntity<Response> updateUser(@RequestAttribute("userID") int userID, String UserName, String Avatar,
             String UserAddress, String UserPhone, String Email, String PASSWORD) {
         try {
-            homeService.updateUser(UserName, Avatar, UserAddress, UserPhone, Email, PASSWORD, userID);
+            postService.updateUser(UserName, Avatar, UserAddress, UserPhone, Email, PASSWORD, userID);
             return ResponseEntity.ok().body(new Response("True", "Thay đổi thông tin thành công", ""));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new Response("False", "Thay đổi thông tin thất bại", ""));
@@ -272,7 +272,7 @@ public class HomeController {
     public ResponseEntity<Response> changePassword(@RequestAttribute("userID") int userID,
             @RequestParam("OldPassword") String oldPassWord, @RequestParam("Password") String passWord) {
         try {
-            if (homeService.changePassword(userID, oldPassWord, passWord)) {
+            if (postService.changePassword(userID, oldPassWord, passWord)) {
                 return ResponseEntity.ok().body(new Response("True", "Thay đổi password thành công", ""));
             } else {
                 return ResponseEntity.ok().body(new Response("False", "Password không đúng", ""));

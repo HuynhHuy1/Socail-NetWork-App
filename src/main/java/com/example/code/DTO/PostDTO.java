@@ -1,4 +1,4 @@
-package com.example.code.DTO;
+package com.example.code.dto;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -13,9 +13,10 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PostDTO {
-    private int PostID;
-    private String UserName, Content;
+    private int id;
+    private String userName, content;
     private List<String> image; 
-    private int LikeCount, CommentCount;
-    private Timestamp TimeCreate;
+    private int likeCount, commentCount;
+    private Timestamp timeCreate;
+    private int userID;
 }

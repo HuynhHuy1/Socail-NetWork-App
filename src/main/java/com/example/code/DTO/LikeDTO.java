@@ -1,4 +1,4 @@
-package com.example.code.DTO;
+package com.example.code.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -10,5 +10,5 @@ import lombok.Setter;
 @Getter
 @Setter
 public class LikeDTO {
-    private String UserName,Avatar;
+    private int userID,postID;
 }

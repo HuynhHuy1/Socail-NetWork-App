@@ -1,4 +1,4 @@
-package com.example.code.DTO;
+package com.example.code.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Friend_Request {
-    int UserIDSend,Status;
-    String userName;
+public class FriendShipDTO {
+    int userID,user2ID,status;
+    String user2Name;
 }

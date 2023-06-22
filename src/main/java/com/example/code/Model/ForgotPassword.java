@@ -1,4 +1,4 @@
-package com.example.code.Model;
+package com.example.code.model;
 
 public class ForgotPassword {
     String Email;

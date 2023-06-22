@@ -1,4 +1,4 @@
-package com.example.code.Model;
+package com.example.code.model;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

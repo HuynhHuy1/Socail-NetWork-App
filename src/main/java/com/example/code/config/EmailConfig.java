@@ -1,4 +1,4 @@
-package com.example.code.EmailSerivce;
+package com.example.code.config;
 
 
 import java.util.Properties;
