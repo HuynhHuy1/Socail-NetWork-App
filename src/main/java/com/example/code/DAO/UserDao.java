@@ -74,9 +74,8 @@ public interface UserDao {
 
         
         @Update(        " UPDATE users " +
-                        " SET name = #{name},avatar = #{avatar},address = #{address},phone = #{phone},email = #{email},password=#{password}"
-        +
-                        " WHERE id = #{id}")
+                        " SET name = #{name},avatar = #{avatar},address = #{address},phone = #{phone}" +
+                        " WHERE id = #{id} ")
         void updateUser(UserDTO user);
 
         @Update(        " UPDATE users " +

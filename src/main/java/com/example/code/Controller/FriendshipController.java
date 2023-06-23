@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.code.dao.FriendshipDao;
 import com.example.code.dto.FriendShipDTO;
 import com.example.code.dto.ResponseDTO;
 import com.example.code.dto.UserDTO;

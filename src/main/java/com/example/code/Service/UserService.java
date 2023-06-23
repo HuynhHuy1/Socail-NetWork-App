@@ -12,17 +12,15 @@ import com.example.code.dto.UserDTO;
 public class UserService {
     @Autowired
     UserDao userDao;
+
     
 
     public List<UserDTO> getUserByName(String userName) {
-        List<UserDTO> users = userDao.getUsersByName(userName);
-        return users;
+        return userDao.getUsersByName(userName);
     }
 
-    public void updateUser(String UserName, String Avatar, String UserAddress, String UserPhone, String Email,
-            String PASSWORD, int id) {
-        UserDTO user = new UserDTO(id, UserName, Avatar, UserAddress, UserPhone, Email, PASSWORD);
-        userDao.updateUser(user);
+    public void updateUser(UserDTO userDto) {
+        userDao.updateUser(userDto);
     }
 
     public boolean changePassword(int userId, String oldPassWord, String passWord) {

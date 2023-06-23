@@ -4,11 +4,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.code.dto.ResponseDTO;
+import com.example.code.dto.UserDTO;
 import com.example.code.service.PostService;
 import com.example.code.service.UserService;
 
@@ -22,11 +24,10 @@ public class InformationController {
     UserService userService;
 
     @PutMapping()
-    public ResponseEntity<ResponseDTO> updateUser(@RequestAttribute("userID") int userID, String UserName,
-            String Avatar,
-            String UserAddress, String UserPhone, String Email, String PASSWORD) {
+    public ResponseEntity<ResponseDTO> updateUser(@RequestAttribute("userID") int userID,@RequestBody UserDTO userDto  ) {
         try {
-            userService.updateUser(UserName, Avatar, UserAddress, UserPhone, Email, PASSWORD, userID);
+            userDto.setId(userID);
+            userService.updateUser(userDto);
             return ResponseEntity.ok().body(new ResponseDTO("True", "Thay đổi thông tin thành công", ""));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new ResponseDTO("False", "Thay đổi thông tin thất bại", ""));
