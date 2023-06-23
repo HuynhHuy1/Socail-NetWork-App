@@ -14,11 +14,10 @@ public class AuthorizationService {
     private static String secretKey = "MyKey";
 
     public String generateToken(UserDTO user) {
-        String token = Jwts.builder()
+        return Jwts.builder()
                 .setSubject(user.getId() + "")
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
-        return token;
     }
     public int parseToken(String token) {
         try {
@@ -26,8 +25,7 @@ public class AuthorizationService {
                     .setSigningKey(secretKey)
                     .parseClaimsJws(token)
                     .getBody();
-            int id = Integer.parseInt(claims.getSubject());
-            return id;
+            return Integer.parseInt(claims.getSubject());
         } catch (JwtException e) {
             return 0;
         }
@@ -44,11 +42,10 @@ public class AuthorizationService {
         }
     }
     public String generateTokenResetPassword(int keyNumber) {
-        String token = Jwts.builder()
+        return Jwts.builder()
                 .setSubject(keyNumber + "")
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
-        return token;
     }
 
 }

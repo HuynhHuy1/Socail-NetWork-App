@@ -4,10 +4,12 @@ import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import com.example.code.dao.UserDao;
-import com.example.code.dto.AuthenResponseDTO;
-import com.example.code.dto.PasswordResetDTO;
 import com.example.code.dto.UserDTO;
+import com.example.code.exception.ExistedException;
+import com.example.code.exception.NotFoundException;
+import com.example.code.staticmessage.ErrorMessage;
 
 @Service
 public class AuthenticationService {
@@ -18,53 +20,50 @@ public class AuthenticationService {
     @Autowired
     private AuthorizationService authorizationService;
 
-    public AuthenResponseDTO login(UserDTO userLogin) {
+    public String login(UserDTO userLogin) {
         UserDTO userData = userDao.getUserByEmail(userLogin.getEmail());
-        if (userData == null) {
-            return new AuthenResponseDTO(false, "");
+        String passwordData = userData.getPassword();
+        String passwordLogin = userLogin.getPassword();
+        if (passwordLogin.equals(passwordData)) {
+            return generateToken(userLogin);
         } else {
-            String token = generateToken(userLogin);
-            String passwordData = userData.getPassword();
-            String passwordLogin = userLogin.getPassword();
-            return (passwordLogin.equals(passwordData)) ? new AuthenResponseDTO(true, token)
-                    : new AuthenResponseDTO(false, "");
+            throw new NotFoundException(ErrorMessage.EMAIL_NOT_EXISTS);
         }
     }
-    public AuthenResponseDTO signUp(UserDTO userSignUp) {
+
+    public String signUp(UserDTO userSignUp) {
         UserDTO userData = userDao.getUserByEmail(userSignUp.getEmail());
         if (userData == null) {
             userDao.insertUser(userSignUp);
             UserDTO userLateInsert = userDao.getUserByEmail(userSignUp.getEmail());
-            String token = generateToken(userLateInsert);
-            return new AuthenResponseDTO(true, token);
+            return generateToken(userLateInsert);
         } else {
-            return new AuthenResponseDTO(false, "");
+            throw new ExistedException(ErrorMessage.EMAIL_EXISTS);
         }
     }
-
-    public boolean isEmailExist(String Email){
-        UserDTO user = userDao.getUserByEmail(Email);
-        return user != null ? true : false ;
-    } 
 
     public void sendConfirmationEmail(String email) {
         int min = 100_000;
         int max = 999_999;
         Random random = new Random();
         int keyNumber = random.nextInt(max - min + 1) + min;
-        String subject = " Mã thay đổi mật khẩu ";        
-        emailService.sendEmail(email, subject, keyNumber + "");
-        userDao.insertPasswordReset(email, keyNumber);
+        String subject = " Mã thay đổi mật khẩu ";
+        if (userDao.getUserByEmail(email) != null) {
+            emailService.sendEmail(email, subject, keyNumber + "");
+            userDao.insertPasswordReset(email, keyNumber);
+        } else {
+            throw new NotFoundException(ErrorMessage.EMAIL_NOT_EXISTS);
+        }
     }
 
-    public boolean isKeyNumberExist(int keyNumber){
-        PasswordResetDTO passwordResetRequestDto = userDao.getPasswordResetRequest(keyNumber);
-        return passwordResetRequestDto != null ? true : false ;
-    }
     public String generateTokenResetPassword(int keyNumber) {
-            String token = authorizationService.generateTokenResetPassword(keyNumber);
-            return token;
+        if (userDao.getEmailByKey(keyNumber) != null) {
+            return authorizationService.generateTokenResetPassword(keyNumber);
+        } else {
+            throw new NotFoundException(ErrorMessage.NUMBERKEY_NOT_EXISTS);
+        }
     }
+
     public void resetPassWord(int keyNumber, String passWord) {
         String email = userDao.getEmailByKey(keyNumber);
         userDao.updatePasswordByMail(email, passWord);

@@ -15,7 +15,8 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 public class ResponseDTO {
-    private String Status, Message;
+    private String Status;
+    private String Message;
     private Object Data;
     public String toJsonString() {
         ObjectMapper objectMapper = new ObjectMapper();

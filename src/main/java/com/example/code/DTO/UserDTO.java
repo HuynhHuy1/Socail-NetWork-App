@@ -1,7 +1,6 @@
 package com.example.code.dto;
 
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,14 +13,13 @@ import lombok.Setter;
 @AllArgsConstructor
 public class UserDTO {
     private int id;
-    @NotEmpty(message = "Thiếu Name")
+    @NotEmpty()
     private String name;
     private String avatar;
     private String address; 
     private String phone;
-    @Email(message = "Email không hợp lệ")
+    @Email()
     private String email;
-    @NotEmpty(message = "Thiếu password")
-    @Min(value = 8, message = "Password phải từ 8 kí tự trở lên")
+    @NotEmpty()
     private String password;
 }

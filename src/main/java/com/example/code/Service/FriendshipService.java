@@ -15,9 +15,7 @@ public class FriendshipService {
     FriendshipDao friendshipDao;
 
     public List<FriendShipDTO> getFriendShipRequests(int user2ID) {
-        List<FriendShipDTO> listRequest = friendshipDao.getFriendRequest(user2ID);
-        ;
-        return listRequest;
+        return friendshipDao.getFriendRequest(user2ID);
     }
 
     public void addFriend(int userID, int user2ID) {
@@ -43,6 +41,7 @@ public class FriendshipService {
         FriendShipDTO friendShipDto = new FriendShipDTO();
         friendShipDto.setUserID(userID);
         friendShipDto.setUser2ID(user2ID);
+
         friendshipDao.deleteFriend(friendShipDto);
     }
 

@@ -25,20 +25,13 @@ public class UserController {
 
     @GetMapping("{name}")
     public ResponseEntity<ResponseDTO> getUsersByName(@PathVariable("name") String userName) {
-        try {
-            List<UserDTO> listUser = userService.getUserByName(userName);
-            return ResponseEntity.ok().body(new ResponseDTO("True", "Lấy danh sách thành công", listUser));
-        } catch (Exception e) {
-            return ResponseEntity.ok().body(new ResponseDTO("True", "Lấy danh sách thất bại", ""));
-        }
+        List<UserDTO> listUser = userService.getUserByName(userName);
+        return ResponseEntity.ok().body(new ResponseDTO("Success", "Lấy danh sách thành công", listUser));
     }
+
     @GetMapping("profile/{id}")
     public ResponseEntity<ResponseDTO> getUserProfileByID(@PathVariable("id") int userID) {
-        try {
-            List<PostDTO> listPost = postService.getProfile(userID);
-            return ResponseEntity.ok().body(new ResponseDTO("True", "Lấy profile thành công", listPost));
-        } catch (Exception e) {
-            return ResponseEntity.ok().body(new ResponseDTO("True", "Lấy profile thất bại", ""));
-        }
+        List<PostDTO> listPost = postService.getProfile(userID);
+        return ResponseEntity.ok().body(new ResponseDTO("Success", "Lấy profile thành công", listPost));
     }
 }

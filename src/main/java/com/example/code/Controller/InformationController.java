@@ -24,26 +24,17 @@ public class InformationController {
     UserService userService;
 
     @PutMapping()
-    public ResponseEntity<ResponseDTO> updateUser(@RequestAttribute("userID") int userID,@RequestBody UserDTO userDto  ) {
-        try {
-            userDto.setId(userID);
-            userService.updateUser(userDto);
-            return ResponseEntity.ok().body(new ResponseDTO("True", "Thay đổi thông tin thành công", ""));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new ResponseDTO("False", "Thay đổi thông tin thất bại", ""));
-        }
+    public ResponseEntity<ResponseDTO> updateUser(@RequestAttribute("userID") int userID,
+            @RequestBody UserDTO userDto) {
+        userDto.setId(userID);
+        userService.updateUser(userDto);
+        return ResponseEntity.ok().body(new ResponseDTO("Success", "Thay đổi thông tin thành công", ""));
     }
+
     @PutMapping("password")
     public ResponseEntity<ResponseDTO> changePassword(@RequestAttribute("userID") int userID,
-            @RequestParam("OldPassword") String oldPassWord, @RequestParam("Password") String passWord) {
-        try {
-            if (userService.changePassword(userID, oldPassWord, passWord)) {
-                return ResponseEntity.ok().body(new ResponseDTO("True", "Thay đổi password thành công", ""));
-            } else {
-                return ResponseEntity.ok().body(new ResponseDTO("False", "Password không đúng", ""));
-            }
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new ResponseDTO("False", "Thay đổi password thất bại", ""));
-        }
+        @RequestParam("OldPassword") String oldPassWord, @RequestParam("Password") String passWord) {
+        userService.changePassword(userID, oldPassWord, passWord);
+        return ResponseEntity.ok().body(new ResponseDTO("Success", "Thay đổi password thành công", ""));
     }
 }

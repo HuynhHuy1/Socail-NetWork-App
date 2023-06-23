@@ -3,7 +3,6 @@ package com.example.code.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,40 +25,25 @@ public class LikeController {
 
     @GetMapping("users-liked")
     ResponseEntity<ResponseDTO> getLike(@PathVariable("post-id") int postID) {
-        try {
-            List<UserDTO> listUserLike = postService.getUserLike(postID);
-            return ResponseEntity.ok().body(
-                    new ResponseDTO("True", "Lấy danh sách thành công", listUserLike));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.FOUND).body(
-                    new ResponseDTO("False", e.getStackTrace().toString(), ""));
-        }
+        List<UserDTO> listUserLike = postService.getUserLike(postID);
+        return ResponseEntity.ok().body(
+                new ResponseDTO("Success", "Lấy danh sách thành công", listUserLike));
     }
 
     @PostMapping()
-    ResponseEntity<ResponseDTO> postLike(@RequestAttribute("userID") int userID, 
-                                         @PathVariable("post-id") int postID){
-        try {
-            postService.createLike(userID, postID);
-            return ResponseEntity.ok().body(
-                    new ResponseDTO("True", "Thích bài viết thành công", ""));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.FOUND).body(
-                    new ResponseDTO("False", e.getStackTrace().toString(), ""));
-        }
+    ResponseEntity<ResponseDTO> postLike(@RequestAttribute("userID") int userID,
+            @PathVariable("post-id") int postID) {
+        postService.createLike(userID, postID);
+        return ResponseEntity.ok().body(
+                new ResponseDTO("Success", "Thích bài viết thành công", ""));
     }
 
     @DeleteMapping()
-    ResponseEntity<ResponseDTO> unLike(@RequestAttribute("userID") int userID, 
-                                       @PathVariable("post-id") int postID){
-        try {
-            postService.deleteLike(postID, userID);
-            return ResponseEntity.ok().body(
-                    new ResponseDTO("True", "Huỷ Thích bài viết thành công", ""));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.FOUND).body(
-                    new ResponseDTO("False", e.getStackTrace().toString(), ""));
-        }
+    ResponseEntity<ResponseDTO> unLike(@RequestAttribute("userID") int userID,
+            @PathVariable("post-id") int postID) {
+        postService.deleteLike(postID, userID);
+        return ResponseEntity.ok().body(
+                new ResponseDTO("Success", "Huỷ Thích bài viết thành công", ""));
     }
 
 }

@@ -38,43 +38,37 @@ public class PostService {
 
     public List<PostDTO> getPost(int id) {
         List<PostDTO> listPostDTO = postDao.getPostFriend(id);
-        return getBase64Post(listPostDTO);
+        return getBase64PostFiles(listPostDTO);
     }
 
     public void insertPost(String content, MultipartFile[] images, int userID) {
-        try {
-            postDao.insertPost(content, userID);
-            int idStatus = postDao.getLastInsertedPostID();
-            List<String> pathFiles = fileToPathString(images);
-            pathFiles.forEach((path) -> postDao.insertPostDetail(idStatus, path));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        postDao.insertPost(content, userID);
+        int idStatus = postDao.getLastInsertedPostID();
+        List<String> pathFiles = fileToPathString(images);
+        pathFiles.forEach((path) -> postDao.insertPostDetail(idStatus, path));
     }
 
     public void updatePost(MultipartFile[] images, String content, int postID) {
-        try {
-            List<String> listPathString = fileToPathString(images);
-            postDao.updatePost(content, postID);
-            postDao.deletePostDetail(postID);
-            listPathString.forEach((pathString) -> {
-                postDao.insertPostDetail(postID, pathString);
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        List<String> listPathString = fileToPathString(images);
+        postDao.updatePost(content, postID);
+        postDao.deletePostDetail(postID);
+        listPathString.forEach((pathString) -> {
+            postDao.insertPostDetail(postID, pathString);
+        });
     }
 
     public void deletePost(int id, int userID) {
         postDao.deletePost(id, userID);
     }
+
     public List<PostDTO> getProfile(int userId) {
         List<PostDTO> listPostDTO = userDao.getProFileByID(userId);
-        return getBase64Post(listPostDTO);
+        return getBase64PostFiles(listPostDTO);
     }
-    private List<PostDTO> getBase64Post(List<PostDTO> listPostDTO) {
+
+    private List<PostDTO> getBase64PostFiles(List<PostDTO> listPostDTO) {
         List<String> listImageBase64 = new ArrayList<>();
-        List<PostDTO> listPostBase64 = new ArrayList<>();
+        List<PostDTO> listBase64PostFiles = new ArrayList<>();
         listPostDTO.forEach((post) -> {
             List<String> listImage = postDao.getPostDetail(post.getId());
             listImage.forEach((image) -> {
@@ -89,10 +83,10 @@ public class PostService {
             newPost.setTimeCreate(post.getTimeCreate());
             newPost.setLikeCount(post.getLikeCount());
             newPost.setCommentCount(post.getCommentCount());
-            listPostBase64.add(newPost);
+            listBase64PostFiles.add(newPost);
         });
-        listPostBase64.sort(Comparator.comparing(PostDTO::getTimeCreate).reversed());
-        return listPostBase64;
+        listBase64PostFiles.sort(Comparator.comparing(PostDTO::getTimeCreate).reversed());
+        return listBase64PostFiles;
     }
 
     private List<String> fileToPathString(MultipartFile[] files) {
@@ -103,6 +97,7 @@ public class PostService {
         }
         return listPath;
     }
+
     // like
     public List<UserDTO> getUserLike(int postID) {
         return likeDao.getUserLike(postID);
@@ -116,19 +111,21 @@ public class PostService {
     public void deleteLike(int postID, int userID) {
         likeDao.deleteLike(postID, userID);
     }
+
     public List<CommentDTO> getComment(int postID) {
         return commentDao.getComment(postID);
     }
 
     // comment
 
-    public void createComment(String content,int userID,int postID) {
+    public void createComment(String content, int userID, int postID) {
         CommentDTO commentDto = new CommentDTO();
         commentDto.setContent(content);
         commentDto.setId(postID);
         commentDto.setUserID(userID);
         commentDao.insertComment(commentDto);
     }
+
     public void updateComment(String content, int commentID, int userID) {
         CommentDTO commentDto = new CommentDTO();
         commentDto.setContent(content);
