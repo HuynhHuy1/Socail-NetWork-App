@@ -10,6 +10,10 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CommentDTO {
-    int id,userID;
-    String UserName, Content,Avatar;
+    int id;
+    int userID;
+    String UserName;
+
+    String Content;
+    String Avatar;
 }

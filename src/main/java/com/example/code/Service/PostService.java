@@ -12,6 +12,9 @@ import com.example.code.dto.CommentDTO;
 import com.example.code.dto.LikeDTO;
 import com.example.code.dto.PostDTO;
 import com.example.code.dto.UserDTO;
+import com.example.code.exception.ExistException;
+import com.example.code.exception.NullException;
+import com.example.code.staticmessage.ErrorMessage;
 import com.example.code.util.FileUitl;
 import com.example.code.dao.CommentDao;
 import com.example.code.dao.FriendshipDao;
@@ -36,9 +39,14 @@ public class PostService {
     @Autowired
     FileUitl fileUitl;
 
-    public List<PostDTO> getPost(int id) {
-        List<PostDTO> listPostDTO = postDao.getPostFriend(id);
-        return getBase64PostFiles(listPostDTO);
+    public List<PostDTO> getPost(int userId) {
+        if(userDao.getUserByID(userId) != null){
+            List<PostDTO> listPostDTO = postDao.getPostFriend(userId);
+            return getBase64PostFiles(listPostDTO);
+        }
+        else{
+            throw new ExistException(ErrorMessage.USER_NOT_EXISTS);
+        }
     }
 
     public void insertPost(String content, MultipartFile[] images, int userID) {
@@ -119,20 +127,30 @@ public class PostService {
     // comment
 
     public void createComment(String content, int userID, int postID) {
-        CommentDTO commentDto = new CommentDTO();
-        commentDto.setContent(content);
-        commentDto.setId(postID);
-        commentDto.setUserID(userID);
-        commentDao.insertComment(commentDto);
+        if(content != null){
+            CommentDTO commentDto = new CommentDTO();
+            commentDto.setContent(content);
+            commentDto.setId(postID);
+            commentDto.setUserID(userID);
+            commentDao.insertComment(commentDto);
+        }
+        else{
+            throw new NullException(ErrorMessage.CONTENT_NULL);
+        }
+
     }
 
     public void updateComment(String content, int commentID, int userID) {
-        CommentDTO commentDto = new CommentDTO();
-        commentDto.setContent(content);
-        commentDto.setId(commentID);
-        commentDto.setUserID(userID);
-
-        commentDao.updateComment(commentDto);
+        if(content != null){
+            CommentDTO commentDto = new CommentDTO();
+            commentDto.setContent(content);
+            commentDto.setId(commentID);
+            commentDto.setUserID(userID);
+            commentDao.updateComment(commentDto);
+        }
+        else{
+            throw new NullException(ErrorMessage.CONTENT_NULL);
+        }
     }
 
     public void deleteComment(int postID, int userID) {

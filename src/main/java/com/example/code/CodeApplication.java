@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 @MapperScan("com.example.code.dao")
 public class CodeApplication {
+	
 	public static void main(String[] args) {
 		SpringApplication.run(CodeApplication.class, args);
 	}

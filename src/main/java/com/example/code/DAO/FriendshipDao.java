@@ -15,6 +15,15 @@ import com.example.code.dto.UserDTO;
 @Repository
 @Mapper
 public interface FriendshipDao {
+
+    @Select(        " SELECT * FROM friendships " +
+                    " WHERE user1_id = #{userID} AND user2_id = #{user2ID} ")
+    FriendShipDTO   getFriendshipDtoByID(FriendShipDTO friendShipDto);
+
+    @Select(        " SELECT * FROM friendships " +
+                    " WHERE user1_id = #{user1ID} AND user2_id = #{user2ID} ")
+    Object getIDUser2ByI(int user2id);
+
     @Select(        " SELECT u.name as UserName, f.user2_id as UserSend, f.status as Status " +
                     " FROM friendships f " +
                     " INNER JOIN users u ON u.id = f.user2_id " +
@@ -43,4 +52,5 @@ public interface FriendshipDao {
     @Delete(        " DELETE FROM friendships " +
                     " WHERE user1_id = #{userID} AND user2_id = #{user2ID} OR user2_id = #{userID} AND user1_id = #{user2ID} ")
     void deleteFriend(FriendShipDTO friendShipDTO);
+
 }

@@ -53,8 +53,8 @@ public class AuthenticationController {
     @PostMapping("reset-password")
     public ResponseEntity<ResponseDTO> resetPassword(@RequestBody Map<String, String> mapPassword,
             @RequestAttribute("keyNumber") int keyNumber) {
-        String password = mapPassword.get("password");
-        authenticationService.resetPassWord(keyNumber, password);
-        return ResponseEntity.ok().body(new ResponseDTO("True", "Cập nhật mậu khẩu thành công", ""));
+        String password = mapPassword.get("password");  
+            authenticationService.resetPassword(keyNumber, password);
+            return ResponseEntity.ok().body(new ResponseDTO("True", "Cập nhật mậu khẩu thành công", ""));
     }
 }

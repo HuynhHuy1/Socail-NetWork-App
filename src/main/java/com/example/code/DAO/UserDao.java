@@ -81,7 +81,7 @@ public interface UserDao {
         @Update(        " UPDATE users " +
                         " SET password = #{password} " +
                         " WHERE email = #{email} ")
-        void updatePasswordByMail(String email, String password);
+        void updatePasswordByEmail(String email, String password);
 
         @Update(        " UPDATE users " +
                         " SET password = #{password} " +
@@ -90,6 +90,6 @@ public interface UserDao {
 
         @Delete(        " DELETE " +
                         " FROM password_reset " +
-                        " WHERE email = #{email} And number_key = #{numberKey} ")
+                        " WHERE email = #{email} AND number_ = #{numberKey} ")
         void deletePasswordReset(String email, int numberKey);
 }

@@ -14,9 +14,11 @@ import lombok.Setter;
 @AllArgsConstructor
 public class PostDTO {
     private int id;
-    private String userName, content;
+    private String userName;
+    private String content;
     private List<String> image; 
-    private int likeCount, commentCount;
+    private int likeCount;
+    private int commentCount;
     private Timestamp timeCreate;
     private int userID;
 }
