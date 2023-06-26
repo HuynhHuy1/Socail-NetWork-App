@@ -1,0 +1,15 @@
+2023-06-26T09:08:50.809+0700 INFO Starting CodeApplication using Java 17.0.6 with PID 47521 (/Users/mac/Documents/Social NetWork/code/target/classes started by mac in /Users/mac/Documents/Social NetWork/code)
+2023-06-26T09:08:50.809+0700 DEBUG Running with Spring Boot v3.1.0, Spring v6.0.9
+2023-06-26T09:08:50.809+0700 INFO No active profile set, falling back to 1 default profile: "default"
+2023-06-26T09:08:50.856+0700 INFO Tomcat initialized with port(s): 8090 (http)
+2023-06-26T09:08:50.856+0700 INFO Starting service [Tomcat]
+2023-06-26T09:08:50.856+0700 INFO Starting Servlet engine: [Apache Tomcat/10.1.8]
+2023-06-26T09:08:50.860+0700 INFO Initializing Spring embedded WebApplicationContext
+2023-06-26T09:08:50.861+0700 INFO Root WebApplicationContext: initialization completed in 52 ms
+2023-06-26T09:08:50.892+0700 INFO Adding welcome page template: index
+2023-06-26T09:08:50.904+0700 WARN Unable to start LiveReload server
+2023-06-26T09:08:50.906+0700 INFO Tomcat started on port(s): 8090 (http) with context path ''
+2023-06-26T09:08:50.907+0700 INFO Started CodeApplication in 0.12 seconds (process running for 914.739)
+2023-06-26T09:08:50.908+0700 INFO Condition evaluation unchanged
+2023-06-26T09:09:15.767+0700 INFO Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2023-06-26T09:09:15.769+0700 INFO Stopping service [Tomcat]

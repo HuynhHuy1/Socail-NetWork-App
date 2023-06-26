@@ -4,8 +4,12 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import javax.sql.DataSource;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.code.dto.CommentDTO;
@@ -38,6 +42,8 @@ public class PostService {
     AuthorizationService author;
     @Autowired
     FileUitl fileUitl;
+    @Autowired
+    DataSource dataSource;
 
     public List<PostDTO> getPost(int userId) {
         if(userDao.getUserByID(userId) != null){
@@ -49,11 +55,13 @@ public class PostService {
         }
     }
 
+    @Transactional
     public void insertPost(String content, MultipartFile[] images, int userID) {
-        postDao.insertPost(content, userID);
-        int idStatus = postDao.getLastInsertedPostID();
-        List<String> pathFiles = fileToPathString(images);
-        pathFiles.forEach((path) -> postDao.insertPostDetail(idStatus, path));
+            postDao.insertPost(content, userID);
+            int idStatus = postDao.getLastInsertedPostID();
+            List<String> pathFiles = fileToPathString(images);
+            pathFiles.forEach((path) -> postDao.insertPostDetail(idStatus, path));
+            TransactionAspectSupport.currentTransactionStatus().flush();
     }
 
     public void updatePost(MultipartFile[] images, String content, int postID) {
@@ -63,6 +71,7 @@ public class PostService {
         listPathString.forEach((pathString) -> {
             postDao.insertPostDetail(postID, pathString);
         });
+        TransactionAspectSupport.currentTransactionStatus().flush();
     }
 
     public void deletePost(int id, int userID) {

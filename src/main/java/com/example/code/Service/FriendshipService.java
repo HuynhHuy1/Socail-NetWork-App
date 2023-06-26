@@ -55,7 +55,6 @@ public class FriendshipService {
                 throw new ExistException(ErrorMessage.USER_NOT_EXISTS);
             }
         }
-
     }
 
     public List<UserDTO> getFriend(int id) {

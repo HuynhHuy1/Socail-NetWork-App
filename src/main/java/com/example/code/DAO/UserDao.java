@@ -90,6 +90,6 @@ public interface UserDao {
 
         @Delete(        " DELETE " +
                         " FROM password_reset " +
-                        " WHERE email = #{email} AND number_ = #{numberKey} ")
+                        " WHERE email = #{email} AND number_key = #{numberKey} ")
         void deletePasswordReset(String email, int numberKey);
 }

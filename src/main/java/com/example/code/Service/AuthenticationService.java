@@ -1,17 +1,11 @@
 package com.example.code.service;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Random;
 
-import javax.sql.DataSource;
-
-import org.apache.ibatis.session.SqlSession;
-import org.mybatis.spring.SqlSessionFactoryBean;
-import org.mybatis.spring.transaction.SpringManagedTransaction;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import com.example.code.dao.UserDao;
 import com.example.code.dto.UserDTO;
@@ -28,8 +22,6 @@ public class AuthenticationService {
     private EmailService emailService;
     @Autowired
     private AuthorizationService authorizationService;
-    @Autowired
-    private DataSource dataSource;
 
     public String login(UserDTO userLogin) {
         UserDTO userData = userDao.getUserByEmail(userLogin.getEmail());
@@ -75,46 +67,21 @@ public class AuthenticationService {
         }
     }
 
-    /**
-     * @param keyNumber
-     * @param password
-     * @throws RuntimeException
-     */
+    @Transactional
     public void resetPassword(int keyNumber, String password) throws RuntimeException {
-        String email = userDao.getEmailByKey(keyNumber);
-        SpringManagedTransaction sqlSessionFactory = new SpringManagedTransaction(dataSource);
-        Connection sqlSession = null;
-        try {
+            String email = userDao.getEmailByKey(keyNumber);
+            
             if (userDao.getUserByEmail(email) == null) {
                 throw new NullException(ErrorMessage.EMAIL_NOT_EXISTS);
             } else if (userDao.getEmailByKey(keyNumber) == null) {
                 throw new NullException(ErrorMessage.NUMBERKEY_NOT_EXISTS);
             }
-            sqlSession = sqlSessionFactory.getConnection();
-            sqlSession.setAutoCommit(false);
+            
             userDao.updatePasswordByEmail(email, password);
             userDao.deletePasswordReset(email, keyNumber);
-            sqlSession.commit();
-        } catch (Exception e) {
-            if (sqlSession != null) {
-                try {
-                    sqlSession.rollback();
-                    throw new RuntimeException(e);
-                } catch (SQLException e1) {
-                    e1.printStackTrace();
-                }
-            }
-            throw new RuntimeException(e);
-        } finally {
-            if (sqlSession != null) {
-                try {
-                    sqlSession.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+            TransactionAspectSupport.currentTransactionStatus().flush();
     }
+
     private String generateToken(UserDTO user) {
         return authorizationService.generateToken(user);
     }
