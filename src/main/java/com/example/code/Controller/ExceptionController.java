@@ -8,10 +8,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MultipartException;
 
 import com.example.code.dto.ResponseDTO;
 import com.example.code.exception.ExistException;
@@ -28,15 +32,40 @@ public class ExceptionController {
     public ResponseEntity<Object> handleDataAccessException(DataAccessException ex) {
         logger.error("DataAccessException occurred: {}", ex.getMessage());
 
-        ResponseDTO responseDTO = new ResponseDTO("Failed", ex.getMessage(), null);
+        ResponseDTO responseDTO = new ResponseDTO("Failed", "INTERNAL SERVER ERROR", null);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseDTO);
     }
 
     @ExceptionHandler(SQLException.class)
     public ResponseEntity<ResponseDTO> handleSQLException(SQLException ex) {
         logger.error("SQLException occurred: {}", ex.getMessage());
+        ResponseDTO responseDTO = new ResponseDTO("Failed", "INTERNAL SERVER ERROR" + "", null);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseDTO);
+    }
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ResponseDTO> handleException(HttpMessageNotReadableException ex){
+        logger.error("Exception occurred: {}", ex.getMessage());
+        ResponseDTO responseDTO = new ResponseDTO("Failed", "BAD REQUEST", null);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseDTO);
+    }
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ResponseDTO> handleException(HttpRequestMethodNotSupportedException ex) {
+        logger.error("Exception occurred: {}", ex.getMessage());
+        ResponseDTO responseDTO = new ResponseDTO("Failed", "NOT FOUND", null);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseDTO);
+    }
+    
+    @ExceptionHandler(MultipartException.class)
+    public ResponseEntity<ResponseDTO> handleException(MultipartException ex) {
+        logger.error("Exception occurred: {}", ex.getMessage());
+        ResponseDTO responseDTO = new ResponseDTO("Failed", "BAD REQUEST", null);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseDTO);
+    }
 
-        ResponseDTO responseDTO = new ResponseDTO("Failed", ex.getErrorCode() + "", null);
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ResponseDTO> handleException(Exception ex) {
+        logger.error("Exception occurred: {}", ex.getMessage());
+        ResponseDTO responseDTO = new ResponseDTO("Failed", "INTERNAL SERVER ERROR", null);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseDTO);
     }
 
@@ -46,14 +75,6 @@ public class ExceptionController {
 
         ResponseDTO responseDTO = new ResponseDTO("Failed", "Valid exception", null);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseDTO);
-    }
-
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ResponseDTO> handleException(Exception ex) {
-        logger.error("Exception occurred: {}", ex.getMessage());
-
-        ResponseDTO responseDTO = new ResponseDTO("Failed", "Exception", null);
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseDTO);
     }
 
     @ExceptionHandler(NotFoundException.class)

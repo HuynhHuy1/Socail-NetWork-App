@@ -16,6 +16,12 @@ public interface LikeDao {
                     " WHERE l.post_id = #{postID} ")
     List<UserDTO> getUserLike(int postID);
 
+    @Select(        " SELECT post_id as postID, user_id as userID " +
+                    " FROM post_likes " +
+                    " WHERE post_id = #{postID} AND user_id = #{userID}")
+    LikeDTO getLikeByUserIDAndPostID(int postID,int userID);
+
+
     @Insert(        " INSERT INTO post_likes(post_id,user_id) " +
                     " VALUES (#{postID},#{userID}) ")
     void insertLike(LikeDTO likeDTO);

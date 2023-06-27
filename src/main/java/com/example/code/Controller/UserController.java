@@ -4,6 +4,7 @@ import java.util.List;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,6 +29,9 @@ public class UserController {
 
     @GetMapping("{name}")
     public ResponseEntity<ResponseDTO> getUsersByName(@PathVariable("name") String userName) {
+        if(userName ==null || userName.equals("")){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseDTO("Failed","Username required",null));
+        }
         List<UserDTO> listUser = userService.getUserByName(userName);
         return ResponseEntity.ok().body(new ResponseDTO("Success", "Lấy danh sách thành công", listUser));
     }

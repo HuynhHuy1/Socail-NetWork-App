@@ -63,7 +63,7 @@ public interface UserDao {
 
         @Insert(        " INSERT INTO users (name, avatar, address, phone, email, password) " +
                         " VALUES (#{name}, #{avatar}, #{address}, #{phone}, #{email}, #{password}) ")
-        void insertUser(UserDTO user);
+        int insertUser(UserDTO user);
 
         @Select(        "SELECT LAST_INSERT_ID()")
         int getLastInsertedUserID();
@@ -81,15 +81,15 @@ public interface UserDao {
         @Update(        " UPDATE users " +
                         " SET password = #{password} " +
                         " WHERE email = #{email} ")
-        void updatePasswordByEmail(String email, String password);
+        int updatePasswordByEmail(String email, String password);
 
         @Update(        " UPDATE users " +
                         " SET password = #{password} " +
                         " WHERE id = #{userID}" )
-        void updatePasswordByID(String password, int userID);
+        int updatePasswordByID(String password, int userID);
 
         @Delete(        " DELETE " +
                         " FROM password_reset " +
                         " WHERE email = #{email} AND number_key = #{numberKey} ")
-        void deletePasswordReset(String email, int numberKey);
+        int deletePasswordReset(String email, int numberKey);
 }

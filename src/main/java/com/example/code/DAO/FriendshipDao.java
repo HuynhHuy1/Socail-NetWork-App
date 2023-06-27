@@ -16,9 +16,9 @@ import com.example.code.dto.UserDTO;
 @Mapper
 public interface FriendshipDao {
 
-    @Select(        " SELECT * FROM friendships " +
+    @Select(        " SELECT user1_id as userID, user2_id as user2ID FROM friendships " +
                     " WHERE user1_id = #{userID} AND user2_id = #{user2ID} ")
-    FriendShipDTO   getFriendshipDtoByID(FriendShipDTO friendShipDto);
+    FriendShipDTO   getFriendshipDtoByID(int userID,int user2ID);
 
     @Select(        " SELECT * FROM friendships " +
                     " WHERE user1_id = #{user1ID} AND user2_id = #{user2ID} ")

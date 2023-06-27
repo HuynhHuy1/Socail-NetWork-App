@@ -51,8 +51,12 @@ public interface PostDao {
                         " WHERE post_id = #{postID} ")
         List<String> getPostDetail(int postID);
 
+        @Select(        " SELECT id, user_id as UserID FROM posts " +
+                        " WHERE id = #{postID} ")
+        PostDTO getPostByID(int postID );
+
         @Insert(        " INSERT INTO posts(content, user_id) " +
-                        " VALUES ( #{content} , #{userID})")
+                        " VALUES (#{content} , #{userID})")
         void insertPost(String content, int userID);
 
         @Select(        "SELECT LAST_INSERT_ID()")
@@ -65,17 +69,14 @@ public interface PostDao {
         @Update(        " UPDATE posts " +
                         " SET content=#{content} " +
                         " WHERE id = #{id} ")
-        void updatePost(String content, int id);
+        int updatePost(String content, int id);
  
         @Delete(        " DELETE FROM posts " +
-                        " WHERE id = #{id} AND user_id = #{userID} ")
-        void deletePost(int id, int userID);
+                        " WHERE id = #{id} ")
+        int deletePost(int id);
 
         @Delete(        " DELETE FROM post_files " +
                         " WHERE post_id = #{postID}")
-        void deletePostDetail(int postID);
-
-
-        
+        int deletePostDetail(int postID);
 
 }

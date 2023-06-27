@@ -5,14 +5,12 @@ import java.util.Random;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import com.example.code.dao.UserDao;
+import com.example.code.dto.ResponseDTO;
 import com.example.code.dto.UserDTO;
-import com.example.code.exception.ExistException;
-import com.example.code.exception.NotFoundException;
-import com.example.code.exception.NullException;
 import com.example.code.staticmessage.ErrorMessage;
+
 
 @Service
 public class AuthenticationService {
@@ -23,29 +21,31 @@ public class AuthenticationService {
     @Autowired
     private AuthorizationService authorizationService;
 
-    public String login(UserDTO userLogin) {
+    public ResponseDTO login(UserDTO userLogin) {
         UserDTO userData = userDao.getUserByEmail(userLogin.getEmail());
-        String passwordData = userData.getPassword();
         String passwordLogin = userLogin.getPassword();
-        if (passwordLogin.equals(passwordData)) {
-            return generateToken(userLogin);
-        } else {
-            throw new NotFoundException(ErrorMessage.EMAIL_NOT_EXISTS);
+        String passwordData = null;
+        if(userData !=null){
+            passwordData = userData.getPassword();
         }
+        if (passwordLogin.equals(passwordData)) {
+            return new ResponseDTO("Success","Đăng nhập thành công",generateToken(userData));
+        }
+        return new ResponseDTO("Failed",ErrorMessage.LOGIN_FAILED,null);
     }
 
-    public String signUp(UserDTO userSignUp) {
+    public ResponseDTO signUp(UserDTO userSignUp) {
         UserDTO userData = userDao.getUserByEmail(userSignUp.getEmail());
         if (userData == null) {
             userDao.insertUser(userSignUp);
             UserDTO userLateInsert = userDao.getUserByEmail(userSignUp.getEmail());
-            return generateToken(userLateInsert);
-        } else {
-            throw new ExistException(ErrorMessage.EMAIL_EXISTS);
+            String token = generateToken(userLateInsert);
+            return new ResponseDTO("Success","Đăng nhập thành công",token);
         }
+        return new ResponseDTO("Failed",ErrorMessage.EMAIL_EXISTS,null);
     }
 
-    public void sendConfirmationEmail(String email) {
+    public boolean sendConfirmationEmail(String email) {
         int min = 100_000;
         int max = 999_999;
         Random random = new Random();
@@ -54,32 +54,32 @@ public class AuthenticationService {
         if (userDao.getUserByEmail(email) != null) {
             emailService.sendEmail(email, subject, keyNumber + "");
             userDao.insertPasswordReset(email, keyNumber);
-        } else {
-            throw new NotFoundException(ErrorMessage.EMAIL_NOT_EXISTS);
+            return true;
+        }
+        else{
+            return false;
         }
     }
 
-    public String generateTokenResetPassword(int keyNumber) {
+    public ResponseDTO generateTokenResetPassword(int keyNumber) {
         if (userDao.getEmailByKey(keyNumber) != null) {
-            return authorizationService.generateTokenResetPassword(keyNumber);
-        } else {
-            throw new NotFoundException(ErrorMessage.NUMBERKEY_NOT_EXISTS);
+            String token = authorizationService.generateTokenResetPassword(keyNumber);
+            return new ResponseDTO("Success"," Lấy thành công token ",token);
         }
+        return new ResponseDTO("Failed",ErrorMessage.NUMBERKEY_NOT_EXISTS,null);
     }
 
     @Transactional
-    public void resetPassword(int keyNumber, String password) throws RuntimeException {
+    public void resetPassword(int keyNumber, String password) {
             String email = userDao.getEmailByKey(keyNumber);
-            
-            if (userDao.getUserByEmail(email) == null) {
-                throw new NullException(ErrorMessage.EMAIL_NOT_EXISTS);
-            } else if (userDao.getEmailByKey(keyNumber) == null) {
-                throw new NullException(ErrorMessage.NUMBERKEY_NOT_EXISTS);
+            int updateRows = userDao.updatePasswordByEmail(email, password);
+            if(updateRows == 0){
+                throw new RuntimeException();
             }
-            
-            userDao.updatePasswordByEmail(email, password);
-            userDao.deletePasswordReset(email, keyNumber);
-            TransactionAspectSupport.currentTransactionStatus().flush();
+            int deleteRows = userDao.deletePasswordReset(email, keyNumber);
+            if(deleteRows == 0){
+                throw new RuntimeException();
+            }
     }
 
     private String generateToken(UserDTO user) {

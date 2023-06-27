@@ -48,14 +48,21 @@ public class FriendshipController {
     @PostMapping("{user2-id}")
     public ResponseEntity<ResponseDTO> addFriend(@RequestAttribute("userID") int userID,
             @PathVariable("user2-id") int user2ID) {
-        friendshipService.addFriend(userID, user2ID);
-        return ResponseEntity.ok().body(new ResponseDTO("Success", "thêm bạn bè thành công", ""));
+        if(user2ID == userID) return ResponseEntity.badRequest().body(new ResponseDTO("Failed", "Không thể kết bạn với bản thân",null));
+        ResponseDTO responseDTO = friendshipService.addFriend(userID, user2ID);
+        if (responseDTO.getStatus().equals("Success")) {
+            return ResponseEntity.ok().body(responseDTO);
+        }
+        return ResponseEntity.badRequest().body(responseDTO);
     }
 
     @DeleteMapping("{user2ID}")
     public ResponseEntity<ResponseDTO> deleteFriend(@RequestAttribute("userID") int userID,
             @PathVariable("user2ID") int user2ID) {
-        friendshipService.deleteFriend(userID, user2ID);
-        return ResponseEntity.ok().body(new ResponseDTO("Success", "Xoá bạn thành công", ""));
+        ResponseDTO responseDTO = friendshipService.deleteFriend(userID, user2ID);
+        if (responseDTO.getStatus().equals("Success")) {
+            return ResponseEntity.ok().body(responseDTO);
+        }
+        return ResponseEntity.badRequest().body(responseDTO);
     }
 }

@@ -3,6 +3,8 @@ package com.example.code.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,11 +16,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.FlashMapManager;
 
 import com.example.code.dto.PostDTO;
 import com.example.code.dto.ResponseDTO;
+import com.example.code.dto.ServiceResponseDTO;
 import com.example.code.service.AuthorizationService;
 import com.example.code.service.PostService;
+
+import jakarta.mail.Service;
 
 @RestController
 @RequestMapping("api/posts")
@@ -37,25 +43,42 @@ public class PostController {
 
     @PostMapping()
     ResponseEntity<ResponseDTO> uploadPost(@RequestAttribute("userID") int id,
-            @RequestParam("Images") MultipartFile[] images, @RequestParam("Content") String content) {
+                                           @RequestParam(value = "Images",required =  false) MultipartFile[] images,
+                                           @RequestParam(value = "Content",required = false) String content) {
+        if(images == null && (content == null || content.equals(""))){
+            return ResponseEntity.badRequest().body(new ResponseDTO("Failed","Image or Content required",""));
+        }
         postService.insertPost(content, images, id);
         return ResponseEntity.ok().body(
-                new ResponseDTO("Ok", "Upload bài viết thành công", ""));
+                new ResponseDTO("Success", "Upload bài viết thành công", ""));
     }
 
     @PutMapping("{id}")
-    ResponseEntity<ResponseDTO> updatePost(@RequestParam("Images") MultipartFile[] images,
-            @RequestParam("Content") String content, @PathVariable("id") int statusId) {
-        postService.updatePost(images, content, statusId);
-        return ResponseEntity.ok().body(
-                new ResponseDTO("Success", "Update bài viết thành công", ""));
+    ResponseEntity<ResponseDTO> updatePost(@RequestParam(value = "Images", required = false) MultipartFile[] images,
+                                           @RequestParam(value = "Content", required = false) String content,
+                                           @PathVariable("id") int statusId,
+                                           @RequestAttribute("userID") int userID) {
+        if(images == null && (content == null || content.equals(""))){
+            return ResponseEntity.badRequest().body(new ResponseDTO("Failed","Image or Content required",""));
+        }                                            
+        ResponseDTO responseDTO = postService.updatePost(images, content, statusId, userID);
+        if(responseDTO.getStatus().equals("Success"))
+        {
+            return ResponseEntity.ok().body(responseDTO);
+        } 
+        else{
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseDTO);
+        }
     }
 
     @DeleteMapping("{id}")
     ResponseEntity<ResponseDTO> deletePost(@PathVariable("id") int id, @RequestAttribute("userID") int userID) {
-        postService.deletePost(id, userID);
-        return ResponseEntity.ok().body(
-                new ResponseDTO("Success", "Xoá bài viết thành công", ""));
+        ResponseDTO responseDTO = postService.deletePost(id, userID);
+        if(responseDTO.getStatus().equals("Success")){
+            return ResponseEntity.ok().body(responseDTO);
+        }
+        else{
+            return ResponseEntity.status(404).body(responseDTO);
+        }
     }
-
 }

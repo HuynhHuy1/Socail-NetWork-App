@@ -1,6 +1,7 @@
 package com.example.code.dto;
 
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,13 +14,13 @@ import lombok.Setter;
 @AllArgsConstructor
 public class UserDTO {
     private int id;
-    @NotEmpty()
+    @Email(message = "Invalid format")
+    @NotEmpty(message = "required")
+    private String email;
     private String name;
     private String avatar;
     private String address; 
     private String phone;
-    @Email()
-    private String email;
-    @NotEmpty()
+    @NotEmpty(message = "required")
     private String password;
 }

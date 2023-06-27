@@ -10,6 +10,8 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class FriendShipDTO {
-    int userID,user2ID,status;
+    int userID;
+    int user2ID;
+    int status;
     String user2Name;
 }

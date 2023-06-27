@@ -11,9 +11,9 @@ import lombok.Setter;
 @Setter
 public class CommentDTO {
     int id;
-    int userID;
-    String UserName;
-
-    String Content;
-    String Avatar;
+    int postId;
+    int userId;
+    String userName;
+    String content;
+    String avatar;
 }

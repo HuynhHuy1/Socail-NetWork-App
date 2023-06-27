@@ -7,8 +7,6 @@ import org.springframework.stereotype.Service;
 
 import com.example.code.dao.UserDao;
 import com.example.code.dto.UserDTO;
-import com.example.code.exception.IncorrectException;
-import com.example.code.staticmessage.ErrorMessage;
 
 @Service
 public class UserService {
@@ -19,17 +17,33 @@ public class UserService {
         return userDao.getUsersByName(userName);
     }
 
-    public void updateUser(UserDTO userDto) {
-        userDao.updateUser(userDto);
+    public void updateUser(UserDTO userUpdate,int idUserData) {
+        UserDTO userData = userDao.getUserByID(idUserData);
+        if (userUpdate.getAddress() == null) {
+            userUpdate.setAddress(userData.getAddress());
+        }
+        
+        if (userUpdate.getName() == null) {
+            userUpdate.setName(userData.getName());
+        }
+        
+        if (userUpdate.getAvatar() == null) {
+            userUpdate.setAvatar(userData.getAvatar());
+        }
+        
+        if (userUpdate.getPhone() == null) {
+            userUpdate.setPhone(userData.getPhone());
+        }
+        userUpdate.setId(idUserData);
+        userDao.updateUser(userUpdate);
     }
 
-    public void changePassword(int userId, String oldPassWord, String passWord) {
+    public boolean changePassword(int userId, String oldPassWord, String passWord) {
         UserDTO user = userDao.getUserByID(userId);
         if (user.getPassword().equals(oldPassWord)) {
             userDao.updatePasswordByID(passWord, userId);
+            return false;
         }
-        else{
-            throw new IncorrectException(ErrorMessage.INCORRECT_PASSWORD);
-        }
+        return true;
     }
 }

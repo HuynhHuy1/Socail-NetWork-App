@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.code.dto.ResponseDTO;
-import com.example.code.dto.UserDTO;
 import com.example.code.service.PostService;
 
 @RestController
@@ -23,27 +22,33 @@ public class LikeController {
     @Autowired
     PostService postService;
 
-    @GetMapping("users-liked")
+    @GetMapping()
     ResponseEntity<ResponseDTO> getLike(@PathVariable("post-id") int postID) {
-        List<UserDTO> listUserLike = postService.getUserLike(postID);
-        return ResponseEntity.ok().body(
-                new ResponseDTO("Success", "Lấy danh sách thành công", listUserLike));
+        ResponseDTO responseDTO = postService.getUserLike(postID);
+        if(responseDTO.getStatus().equals("Success")){
+            return ResponseEntity.ok().body(responseDTO);
+        }
+        return ResponseEntity.status(404).body(responseDTO);
     }
 
     @PostMapping()
     ResponseEntity<ResponseDTO> postLike(@RequestAttribute("userID") int userID,
             @PathVariable("post-id") int postID) {
-        postService.createLike(userID, postID);
-        return ResponseEntity.ok().body(
-                new ResponseDTO("Success", "Thích bài viết thành công", ""));
+                ResponseDTO responseDTO = postService.createLike(userID,postID);
+                if(responseDTO.getStatus().equals("Success")){
+                    return ResponseEntity.ok().body(responseDTO);
+                }
+                return ResponseEntity.status(404).body(responseDTO);
     }
 
     @DeleteMapping()
     ResponseEntity<ResponseDTO> unLike(@RequestAttribute("userID") int userID,
             @PathVariable("post-id") int postID) {
-        postService.deleteLike(postID, userID);
-        return ResponseEntity.ok().body(
-                new ResponseDTO("Success", "Huỷ Thích bài viết thành công", ""));
+                ResponseDTO responseDTO = postService.deleteLike(postID,userID);
+                if(responseDTO.getStatus().equals("Success")){
+                    return ResponseEntity.ok().body(responseDTO);
+                }
+                return ResponseEntity.status(404).body(responseDTO);
     }
 
 }
