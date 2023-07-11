@@ -46,25 +46,26 @@ public class AuthenticationController {
                 String fieldError = error.getField() + " : " + error.getDefaultMessage() ;
                 listError.add(fieldError);
             });
-            return ResponseEntity.badRequest().body(new ResponseDTO("Failed", listError.toString(),""));
+            return ResponseEntity.ok().body(new ResponseDTO("Failed", listError.toString(),""));
         }
         ResponseDTO responseDTO = authenticationService.signUp(userDto);
         if(responseDTO.getStatus().equals("Success")){
             logger.info(userDto.getName() + "Sign up");
             return ResponseEntity.ok().body(responseDTO);
         }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseDTO);
+        return ResponseEntity.ok().body(responseDTO);
     }
 
     @PostMapping("login")
     public ResponseEntity<ResponseDTO> login(@Valid @RequestBody UserDTO userDto,BindingResult bindingResult) {
         if(bindingResult.hasErrors()){
+            bindingResult.getAllErrors().toString();
             List<String> listError = new ArrayList<>();
             bindingResult.getFieldErrors().forEach( error -> {
                 String fieldError = error.getField() + " : " + error.getDefaultMessage() ;
                 listError.add(fieldError);
             });
-            return ResponseEntity.badRequest().body(new ResponseDTO("Failed", listError.toString(),""));
+            return ResponseEntity.ok().body(new ResponseDTO("Failed", listError.toString(),""));
         }
 
         ResponseDTO response = authenticationService.login(userDto);
@@ -72,31 +73,31 @@ public class AuthenticationController {
             logger.info(userDto.getName() + "signup");
             return ResponseEntity.ok().body(response);
         }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        return ResponseEntity.ok().body(response);
     }
 
     @PostMapping("forgot-password")
     public ResponseEntity<ResponseDTO> forgotPassword(@Valid @RequestBody EmailDTO emailDto,BindingResult bindingResult) {
         if(bindingResult.hasErrors()){
             FieldError fieldError  = bindingResult.getFieldError();
-            String error =  fieldError.getDefaultMessage();
+            String error = fieldError.getDefaultMessage();
             String field = fieldError.getField();
             String fieldErrorMessage = field + " : " + error;
-            return ResponseEntity.badRequest().body(new ResponseDTO("Failed", fieldErrorMessage,""));
+            return ResponseEntity.ok().body(new ResponseDTO("Failed", fieldErrorMessage,""));
         }
         String email = emailDto.getEmail();
         if(authenticationService.sendConfirmationEmail(email)){
             logger.info("Send email to " + email);
             return ResponseEntity.ok().body(new ResponseDTO("Success", "Đã gửi mail xác nhận", ""));
         }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseDTO("Failed", ErrorMessage.EMAIL_NOT_EXISTS,""));
+        return ResponseEntity.ok().body(new ResponseDTO("Failed", ErrorMessage.EMAIL_NOT_EXISTS,""));
     }
 
     @PostMapping("check-key-number")
     public ResponseEntity<ResponseDTO> checkKeyNumber(@RequestBody Map<String, Integer> mapKeyNumber) {
         if(mapKeyNumber.size() == 0 || mapKeyNumber.get("keyNumber") == null){
             String errorMessage = "KeyNumber required";
-            return ResponseEntity.badRequest().body(new ResponseDTO("Failed", errorMessage,""));
+            return ResponseEntity.ok().body(new ResponseDTO("Failed", errorMessage,""));
         }
         int keyNumber = mapKeyNumber.get("keyNumber");
         ResponseDTO responseDTO = authenticationService.generateTokenResetPassword(keyNumber);
@@ -104,19 +105,19 @@ public class AuthenticationController {
             logger.info("Send token reset password : " + keyNumber) ;
             return ResponseEntity.ok().body(responseDTO);
         }
-        return ResponseEntity.badRequest().body(responseDTO);
+        return ResponseEntity.ok().body(responseDTO);
         }
-        
+    
     @PostMapping("reset-password")
     public ResponseEntity<ResponseDTO> resetPassword(@RequestBody Map<String, String> mapPassword,
             @RequestAttribute("keyNumber") int keyNumber) {
             if(mapPassword.size() == 0 || mapPassword.get("password") == null){
                     String errorMessage = "Password required";
-                    return ResponseEntity.badRequest().body(new ResponseDTO("Failed", errorMessage,""));
+                    return ResponseEntity.ok().body(new ResponseDTO("Failed", errorMessage,""));
             }
             String password = mapPassword.get("password");  
             authenticationService.resetPassword(keyNumber, password);
             logger.info("Reset password : " + password ) ;
-            return ResponseEntity.ok().body(new ResponseDTO("True", "Cập nhật mậu khẩu thành công", ""));
+            return ResponseEntity.ok().body(new ResponseDTO("Success", "Cập nhật mậu khẩu thành công", ""));
     }
 }

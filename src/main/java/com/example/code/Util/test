@@ -1,0 +1,15 @@
+SELECT  p.id as PostID, u.name as UserName, p.user_id as UserID , p.content as Content , cm.CommentNumber as CommentCount , l.LikeNumber as LikeCount, p.create_at as TimeCreate 
+                 FROM posts p  
+                 INNER JOIN friendships f ON f.user2_id = p.user_id  
+                 INNER JOIN users u ON u.id = p.user_id  
+                 LEFT JOIN (  
+                         SELECT post_id, COUNT(post_id) as LikeNumber  
+                         FROM post_likes  
+                         GROUP BY post_id  
+                 ) l ON p.id = l.post_id  
+                 LEFT JOIN(  
+                         SELECT post_id, COUNT(post_id) as CommentNumber  
+                         FROM post_comments  
+                         GROUP BY post_id  
+                 ) cm ON cm.post_id = p.id  
+                       WHERE f.user1_id = #{id}

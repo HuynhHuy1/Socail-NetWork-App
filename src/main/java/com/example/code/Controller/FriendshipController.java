@@ -32,6 +32,19 @@ public class FriendshipController {
                 .body(new ResponseDTO("Success", "Lấy danh sách lời mời kết bạn thành công", listRequest));
     }
 
+    @GetMapping("following")
+    public ResponseEntity<ResponseDTO> getFollowing(@RequestAttribute("userID") int userID) {
+        List<UserDTO> listRequest = friendshipService.getFollowing(userID);
+        return ResponseEntity.ok()
+                .body(new ResponseDTO("Success", "Lấy danh sách lời mời kết bạn thành công", listRequest));
+    }
+
+    @PostMapping("following/{userID}")
+    public ResponseEntity<ResponseDTO> handleFollow(@RequestAttribute("userID") int userLoginID,@PathVariable("userID") int userId) {
+        ResponseDTO responseDTO = friendshipService.addFriend(userLoginID,userId);
+        return ResponseEntity.ok()
+                .body(new ResponseDTO("Success", responseDTO.getMessage(),""));
+    }
     @PutMapping("requests/{user2-id}")
     public ResponseEntity<ResponseDTO> updateFriendShipRequest(@RequestAttribute("userID") int userID,
             @PathVariable("user2-id") int user2ID) {
@@ -53,7 +66,7 @@ public class FriendshipController {
         if (responseDTO.getStatus().equals("Success")) {
             return ResponseEntity.ok().body(responseDTO);
         }
-        return ResponseEntity.badRequest().body(responseDTO);
+        return ResponseEntity.ok().body(responseDTO);
     }
 
     @DeleteMapping("{user2ID}")
@@ -63,6 +76,6 @@ public class FriendshipController {
         if (responseDTO.getStatus().equals("Success")) {
             return ResponseEntity.ok().body(responseDTO);
         }
-        return ResponseEntity.badRequest().body(responseDTO);
+        return ResponseEntity.ok().body(responseDTO);
     }
 }

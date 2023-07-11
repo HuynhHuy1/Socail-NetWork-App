@@ -2,9 +2,7 @@ package com.example.code.service;
 
 import java.util.List;
 
-import org.apache.catalina.connector.Response;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import com.example.code.dao.FriendshipDao;
@@ -25,18 +23,27 @@ public class FriendshipService {
         return friendshipDao.getFriendRequest(user2ID);
     }
 
-    public ResponseDTO addFriend(int userID, int user2ID) {
+    public List<UserDTO> getFollowing(int user2ID) {
+        return friendshipDao.getFollowing(user2ID);
+    }
 
+    public ResponseDTO addFriend(int userID, int user2ID) {
         if (friendshipDao.getFriendshipDtoByID(userID, user2ID) != null) {
-            return new ResponseDTO("Failed", ErrorMessage.FRIENDSHIP_EXISTS, null);
+            FriendShipDTO friendShipDto = new FriendShipDTO();
+            friendShipDto.setUserID(userID);
+            friendShipDto.setUser2ID(user2ID);
+            friendshipDao.deleteFriend(friendShipDto);
+            return new ResponseDTO("Success", "Huy theo doi thanh cong", null);
         } else if (userDao.getUserByID(user2ID) == null) {
             return new ResponseDTO("Failed", ErrorMessage.USER_NOT_EXISTS, null);
         }
-        FriendShipDTO friendShipDto = new FriendShipDTO();
-        friendShipDto.setUserID(userID);
-        friendShipDto.setUser2ID(user2ID);
-        friendshipDao.insertFriend(friendShipDto);
-        return new ResponseDTO("Success", "Thêm bạn bè thành công", null);
+        else{
+            FriendShipDTO friendShipDto = new FriendShipDTO();
+            friendShipDto.setUserID(userID);
+            friendShipDto.setUser2ID(user2ID);
+            friendshipDao.insertFriend(friendShipDto);
+            return new ResponseDTO("Success", "Thêm bạn bè thành công", null);
+        }
     }
 
     public ResponseDTO updateStatusFriendRequest(int userID, int user2ID) {

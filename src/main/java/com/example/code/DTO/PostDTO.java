@@ -1,7 +1,6 @@
 package com.example.code.dto;
 
 import java.sql.Timestamp;
-import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,12 +12,16 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PostDTO {
-    private int id;
+    private int postId;
     private String userName;
     private String content;
-    private List<String> image; 
+    private String image; 
     private int likeCount;
     private int commentCount;
+    private String avatar;
     private Timestamp timeCreate;
     private int userID;
+    private String timeFormatString = "";
+    private Boolean stateLike ;
+    private String avatarBase64;
 }

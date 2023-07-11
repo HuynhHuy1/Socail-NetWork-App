@@ -1,6 +1,5 @@
 package com.example.code.controller;
 
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +27,17 @@ public class LikeController {
         if(responseDTO.getStatus().equals("Success")){
             return ResponseEntity.ok().body(responseDTO);
         }
-        return ResponseEntity.status(404).body(responseDTO);
+        return ResponseEntity.ok().body(responseDTO);
+    }
+
+    @PostMapping("handle-like")
+    ResponseEntity<ResponseDTO> Like(@RequestAttribute("userID") int userID,
+            @PathVariable("post-id") int postID) {
+                ResponseDTO responseDTO = postService.Like(userID,postID);
+                if(responseDTO.getStatus().equals("Success")){
+                    return ResponseEntity.ok().body(responseDTO);
+                }
+                return ResponseEntity.ok().body(responseDTO);
     }
 
     @PostMapping()
@@ -38,7 +47,7 @@ public class LikeController {
                 if(responseDTO.getStatus().equals("Success")){
                     return ResponseEntity.ok().body(responseDTO);
                 }
-                return ResponseEntity.status(404).body(responseDTO);
+                return ResponseEntity.ok().body(responseDTO);
     }
 
     @DeleteMapping()
@@ -48,7 +57,6 @@ public class LikeController {
                 if(responseDTO.getStatus().equals("Success")){
                     return ResponseEntity.ok().body(responseDTO);
                 }
-                return ResponseEntity.status(404).body(responseDTO);
+                return ResponseEntity.ok().body(responseDTO);
     }
-
 }

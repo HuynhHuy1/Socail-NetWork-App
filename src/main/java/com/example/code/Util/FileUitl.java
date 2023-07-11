@@ -4,6 +4,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 import org.springframework.core.io.Resource;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.Duration;
 @Component
 public class FileUitl {
     private String path = "src/main/resources/static/image";
@@ -35,6 +38,21 @@ public class FileUitl {
             return java.util.Base64.getEncoder().encodeToString(imageBytes);
         } catch (Exception e) {
             return null;
+        }
+    }
+
+    public static String formatTimestamp(String timestamp) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
+        LocalDateTime dateTime = LocalDateTime.parse(timestamp, formatter);
+        LocalDateTime currentDateTime = LocalDateTime.now();
+        Duration duration = Duration.between(dateTime, currentDateTime);
+
+        if (duration.toMinutes() < 60) {
+            return duration.toMinutes() + " phút trước";
+        } else if (duration.toHours() < 24) {
+            return duration.toHours() + " giờ trước";
+        } else {
+            return duration.toDays() + " ngày trước";
         }
     }
 }

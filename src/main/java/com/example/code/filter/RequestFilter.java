@@ -30,13 +30,13 @@ public class RequestFilter implements HandlerInterceptor {
                     request.setAttribute("userID", userID);
                     return true;
                 } else {
-                    response.setStatus(403);
+                    response.setStatus(200);
                     response.setContentType("application/json");
                     response.getWriter().write(new ResponseDTO("False", "Loi xac thuc nguoi dung", "").toJsonString());
                     return false;
                 }
             } catch (Exception e) {
-                response.setStatus(403);
+                response.setStatus(200);
                 response.setContentType("application/json");
                 response.getWriter().write(new ResponseDTO("False", "Loi xac thuc nguoi dung", "").toJsonString());
                 return false;
@@ -49,13 +49,13 @@ public class RequestFilter implements HandlerInterceptor {
                     request.setAttribute("keyNumber", keyNumber);
                     return true;
                 } else {
-                    response.setStatus(403);
+                    response.setStatus(200);
                     response.setContentType("application/json");
                     response.getWriter().write(new ResponseDTO("False", "Đổi mật khẩu thất bại", "").toJsonString());
                     return false;
                 }
             } catch (Exception e) { 
-                response.setStatus(403);
+                response.setStatus(200);
                 response.setContentType("application/json");
                 response.getWriter().write(new ResponseDTO("False", "Đổi mật khẩu thất bại", "").toJsonString());
                 return false;

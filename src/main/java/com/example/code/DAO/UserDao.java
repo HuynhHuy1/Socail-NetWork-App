@@ -92,4 +92,20 @@ public interface UserDao {
                         " FROM password_reset " +
                         " WHERE email = #{email} AND number_key = #{numberKey} ")
         int deletePasswordReset(String email, int numberKey);
+
+
+        @Select(        " SELECT u.id ,u.name,u.avatar,u.address,u.phone, fl1.Follower as follower , fl2.following as Following " +
+                        " FROM users u " + 
+                        " LEFT JOIN ( " +
+                        " SELECT f.user1_id as userID, COUNT(f.user1_id) as Follower " +
+                        " FROM friendships f " +
+                        " GROUP BY f.user1_id " +
+                        " ) fl1 ON fl1.userID = u.id " +
+                        " LEFT JOIN ( " +
+                        " SELECT f.user2_id as userID, COUNT(f.user1_id) as Following " +
+                        " FROM friendships f " +
+                        " GROUP BY f.user2_id "+
+                        " ) fl2 ON fl2.userID = u.id " +
+                        " WHERE u.id = #{id} ")
+        UserDTO getProfileUserDTO(int id);
 }

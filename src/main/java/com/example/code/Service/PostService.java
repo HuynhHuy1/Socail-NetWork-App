@@ -1,5 +1,6 @@
 package com.example.code.service;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -45,7 +46,12 @@ public class PostService {
 
     public List<PostDTO> getPost(int userId) {
         List<PostDTO> listPostDTO = postDao.getPostFriend(userId);
-        return getBase64PostFiles(listPostDTO);
+        return getBase64PostFiles(listPostDTO, userId);
+    }
+
+    public List<PostDTO> getPostFollowingDtos(int userId) {
+        List<PostDTO> listPostDTO = postDao.getPostFollowingDtos(userId);
+        return getBase64PostFiles(listPostDTO, userId);
     }
 
     @Transactional
@@ -88,28 +94,32 @@ public class PostService {
         return new ResponseDTO("Success", "Xoá bài viết thành công", null);
     }
 
-    public List<PostDTO> getProfile(int userId) {
-        List<PostDTO> listPostDTO = userDao.getProFileByID(userId);
-        return getBase64PostFiles(listPostDTO);
+    public UserDTO getProfile(int userId) {
+        UserDTO userProfileDTO = userDao.getProfileUserDTO(userId);
+        userProfileDTO.setAvatar(new FileUitl().readFile(userProfileDTO.getAvatar()));
+        return userProfileDTO;
     }
 
-    private List<PostDTO> getBase64PostFiles(List<PostDTO> listPostDTO) {
-        List<String> listImageBase64 = new ArrayList<>();
+    private List<PostDTO> getBase64PostFiles(List<PostDTO> listPostDTO, int userID) {
         List<PostDTO> listBase64PostFiles = new ArrayList<>();
         listPostDTO.forEach((post) -> {
-            List<String> listImage = postDao.getPostDetail(post.getId());
-            listImage.forEach((image) -> {
-                String imageBase64 = fileUitl.readFile(image);
-                listImageBase64.add(imageBase64);
-            });
+            String Image = postDao.getPostDetail(post.getPostId());
+            String imageBase64 = fileUitl.readFile(Image);
             PostDTO newPost = new PostDTO();
-            newPost.setId(post.getId());
+            newPost.setPostId(post.getPostId());
             newPost.setUserName(post.getUserName());
             newPost.setContent(post.getContent());
-            newPost.setImage(listImageBase64);
+            newPost.setImage(imageBase64);
             newPost.setTimeCreate(post.getTimeCreate());
+            String timeFormat = fileUitl.formatTimestamp(post.getTimeCreate().toString());
+            newPost.setTimeFormatString(timeFormat);
             newPost.setLikeCount(post.getLikeCount());
             newPost.setCommentCount(post.getCommentCount());
+            newPost.setUserID(post.getUserID());
+            Boolean isBoolean = isUserLike(userID, userID);
+                newPost.setStateLike(isUserLike(userID, post.getPostId()));
+            String avatarBase64 = fileUitl.readFile(post.getAvatar());
+            newPost.setAvatarBase64(avatarBase64);
             listBase64PostFiles.add(newPost);
         });
         listBase64PostFiles.sort(Comparator.comparing(PostDTO::getTimeCreate).reversed());
@@ -126,38 +136,53 @@ public class PostService {
     }
 
     // like
+
     public ResponseDTO getUserLike(int postID) {
         PostDTO postDTO = postDao.getPostByID(postID);
-        if(postDTO== null){
-            return new ResponseDTO("Failed",ErrorMessage.POST_NOT_EXIST,null);
+        if (postDTO == null) {
+            return new ResponseDTO("Failed", ErrorMessage.POST_NOT_EXIST, null);
         }
         List<UserDTO> listLikeDTO = likeDao.getUserLike(postID);
         return new ResponseDTO("Success", "Lấy danh sách thành công", listLikeDTO);
     }
 
-    public ResponseDTO createLike(int userID, int postID) {
+    public ResponseDTO Like(int userID, int postID) {
         PostDTO postDTO = postDao.getPostByID(postID);
-        if(postDTO== null){
-            return new ResponseDTO("Failed",ErrorMessage.POST_NOT_EXIST,null);
+        if (postDTO == null) {
+            return new ResponseDTO("Failed", ErrorMessage.POST_NOT_EXIST, null);
         }
-        if(likeDao.getLikeByUserIDAndPostID(postID, userID) != null){
-            return new ResponseDTO("Failed",ErrorMessage.LIKE_DUPLICATE,null);
+        if (likeDao.getLikeByUserIDAndPostID(postID, userID) != null) {
+            likeDao.deleteLike(postID, userID);
+            return new ResponseDTO("Success", "Thích bài viết thành công", null);
         }
         LikeDTO likeDto = new LikeDTO(userID, postID);
         likeDao.insertLike(likeDto);
-        return new ResponseDTO("Success","Thích bài viết thành công",null);
+        return new ResponseDTO("Success", "Thích bài viết thành công", null);
+    }
+
+    public ResponseDTO createLike(int userID, int postID) {
+        PostDTO postDTO = postDao.getPostByID(postID);
+        if (postDTO == null) {
+            return new ResponseDTO("Failed", ErrorMessage.POST_NOT_EXIST, null);
+        }
+        if (likeDao.getLikeByUserIDAndPostID(postID, userID) != null) {
+            return new ResponseDTO("Failed", ErrorMessage.LIKE_DUPLICATE, null);
+        }
+        LikeDTO likeDto = new LikeDTO(userID, postID);
+        likeDao.insertLike(likeDto);
+        return new ResponseDTO("Success", "Thích bài viết thành công", null);
     }
 
     public ResponseDTO deleteLike(int postID, int userID) {
         PostDTO postDTO = postDao.getPostByID(postID);
-        if(postDTO== null){
-            return new ResponseDTO("Failed",ErrorMessage.POST_NOT_EXIST,null);
+        if (postDTO == null) {
+            return new ResponseDTO("Failed", ErrorMessage.POST_NOT_EXIST, null);
         }
-        if(likeDao.getLikeByUserIDAndPostID(postID, userID) == null){
-            return new ResponseDTO("Failed",ErrorMessage.LIKE_NOT_EXIST,null);
+        if (likeDao.getLikeByUserIDAndPostID(postID, userID) == null) {
+            return new ResponseDTO("Failed", ErrorMessage.LIKE_NOT_EXIST, null);
         }
-        likeDao.deleteLike(postID,userID);
-        return new ResponseDTO("Success","Huỷ thích bài viết thành công",null);
+        likeDao.deleteLike(postID, userID);
+        return new ResponseDTO("Success", "Huỷ thích bài viết thành công", null);
     }
 
     // comment
@@ -167,6 +192,10 @@ public class PostService {
             return new ResponseDTO("Failed", ErrorMessage.POST_NOT_EXIST, null);
         }
         List<CommentDTO> listComment = commentDao.getComment(postID);
+        listComment.forEach( (comment) -> {
+            String avatarBase64 = new FileUitl().readFile(comment.getAvatar());
+            comment.setAvatar(avatarBase64);
+        });
         return new ResponseDTO("Success", "Lấy bài đăng thành công", listComment);
     }
 
@@ -187,8 +216,7 @@ public class PostService {
         UserDTO userComment = commentDao.getUserIDByCommentID(commentID);
         if (userComment == null) {
             return new ResponseDTO("Failed", ErrorMessage.COMMENT_NOT_EXIST, null);
-        }
-        else if (userComment.getId() == userID) {
+        } else if (userComment.getId() == userID) {
             CommentDTO commentDto = new CommentDTO();
             commentDto.setContent(content);
             commentDto.setId(commentID);
@@ -196,7 +224,7 @@ public class PostService {
             commentDao.updateComment(commentDto);
             return new ResponseDTO("Success", "Cập nhật bình luận thành công", null);
         }
-        
+
         return new ResponseDTO("Failed", ErrorMessage.COMMENT_NOT_OF_USER, null);
     }
 
@@ -213,5 +241,21 @@ public class PostService {
             return new ResponseDTO("Success", "Xoá bình luận thành công", null);
         }
         return new ResponseDTO("Failed", ErrorMessage.COMMENT_NOT_OF_USER, null);
+    }
+
+    public boolean isUserLike(int userID, int postID) {
+        LikeDTO likeDTO = postDao.getLikeDTO(postID, userID);
+        return likeDTO != null;
+    }
+
+    public List<PostDTO> getImageById(int id){
+        List<PostDTO> listImage = postDao.getImageById(id);
+        listImage.forEach((image) ->{
+            String imageBase64 = new FileUitl().readFile(image.getImage());
+            image.setImage(imageBase64);
+            String timeFormat = FileUitl.formatTimestamp(image.getTimeCreate().toString());
+            image.setTimeFormatString(timeFormat);
+        });
+        return listImage ;
     }
 }

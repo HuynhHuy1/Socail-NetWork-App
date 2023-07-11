@@ -3,9 +3,7 @@ package com.example.code.controller;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.core.config.plugins.validation.constraints.Required;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
@@ -13,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.code.dto.ResponseDTO;
 import com.example.code.dto.UserDTO;
@@ -32,14 +31,21 @@ public class InformationController {
     UserService userService;
 
     @PutMapping()
-    public ResponseEntity<ResponseDTO> updateUser(@RequestAttribute("userID") int userID,
-                                                  @RequestBody UserDTO userDto) {
-
-        if(userDto.getAddress() == null && userDto.getAvatar() == null &&userDto.getName() == null && userDto.getPhone()==null)
+    public ResponseEntity<ResponseDTO> updateUser(@RequestAttribute(value = "userID",required = false) int userID,
+                                                  @RequestParam(value = "avatar", required = false) MultipartFile avatar,
+                                                  @RequestParam(value = "userName", required = false) String userName,
+                                                  @RequestParam(value = "address",required = false) String address,
+                                                  @RequestParam(value = "phone",required = false) String phone ) {
+        
+        if(avatar == null && userName == null && address== null && phone==null) 
         {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseDTO("Failed", "Request update null", null));
-        } 
-        userService.updateUser(userDto,userID);
+            return ResponseEntity.ok().body(new ResponseDTO("Failed", "Request update null", null));
+        }
+        UserDTO userDto = new UserDTO();
+        userDto.setName(userName);
+        userDto.setAddress(address);
+        userDto.setPhone(phone);
+        userService.updateUser(userDto,userID,avatar);
         logger.info("Update User " + userID + " : " + userDto.toString());
         return ResponseEntity.ok().body(new ResponseDTO("Success", "Thay đổi thông tin thành công", ""));
     }

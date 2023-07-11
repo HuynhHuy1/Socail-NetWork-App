@@ -30,7 +30,6 @@ public class AuthorizationService {
             return 0;
         }
     }
-    
     public boolean isValidUser(String token) {
         try {
             Jwts.parser()

@@ -1,7 +1,6 @@
 package com.example.code.dto;
 
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,4 +22,6 @@ public class UserDTO {
     private String phone;
     @NotEmpty(message = "required")
     private String password;
+    private int follower;
+    private int following;
 }

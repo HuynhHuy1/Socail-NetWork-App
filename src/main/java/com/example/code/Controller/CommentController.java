@@ -1,6 +1,7 @@
 package com.example.code.controller;
 
-import java.util.List;
+
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -33,29 +35,29 @@ public class CommentController {
                 }
                 return ResponseEntity.ok().body(responseDTO);
         }
-
         @PostMapping()
-        ResponseEntity<ResponseDTO> uploadComment(@RequestParam( value =  "Content",required = false) String content,
+        ResponseEntity<ResponseDTO> uploadComment(@RequestBody Map<String,String> mapContent,
                                                   @RequestAttribute("userID") int userID,
                                                   @PathVariable("post-id") int postID) {
+                String content = mapContent.get("content");
                 if(content.equals("") || content == null ){
-                        return ResponseEntity.badRequest().body(
+                        return ResponseEntity.ok().body(
                                 new ResponseDTO("Failed", "Content required", null));
                 }
                 ResponseDTO responseDTO =  postService.createComment(content, userID, postID);
                 if(responseDTO.getStatus().equals("Failed")){
-                        return ResponseEntity.status(404).body(responseDTO);
+                        return ResponseEntity.ok().body(responseDTO);
                 }
                 return ResponseEntity.ok().body(responseDTO);
         }
 
         @PutMapping("{comment-id}")
-        ResponseEntity<ResponseDTO> updateComment(@RequestParam("Content") String content,
+        ResponseEntity<ResponseDTO> updateComment(@RequestAttribute String content,
                                                   @RequestAttribute("userID") int userID,
                                                   @PathVariable("comment-id") int commentID) {
                 ResponseDTO responseDTO = postService.updateComment(content, commentID, userID);
                 if(responseDTO.getStatus().equals("Failed")){
-                        return ResponseEntity.status(404).body(responseDTO);
+                        return ResponseEntity.ok().body(responseDTO);
                 }
                 return ResponseEntity.ok().body(responseDTO);
         }
@@ -65,7 +67,7 @@ public class CommentController {
                                                   @RequestAttribute("userID") int userID) {
                 ResponseDTO responseDTO = postService.deleteComment(commentID, userID);
                 if(responseDTO.getStatus().equals("Failed")){
-                                return ResponseEntity.status(404).body(responseDTO);
+                                return ResponseEntity.ok().body(responseDTO);
                 }
                 return ResponseEntity.ok().body(
                                 new ResponseDTO("Success", "Xoá bình luận thành công", ""));
